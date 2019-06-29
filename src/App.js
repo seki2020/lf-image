@@ -1,26 +1,61 @@
-import React from 'react';
-import logo from './logo.svg';
+import React, {Component} from 'react';
 import './App.css';
+import {Container, Header, Image, List} from 'semantic-ui-react'
 
-function App() {
-  return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
-  );
+import ImageForm from './ImageForm/ImageForm'
+import ImageList from './ImageList/ImageList'
+
+class App extends Component {
+
+    constructor(props) {
+        super(props)
+        this.state = {
+            Images: [
+                {
+                    imgUrl: 'https://via.placeholder.com/150',
+                    title: 'image1',
+                    label1: '',
+                    label2: '',
+                    label3: '',
+                    label4: '',
+                },
+                {
+                    imgUrl: 'https://via.placeholder.com/150',
+                    title: 'image2',
+                    label1: '',
+                    label2: '',
+                    label3: '',
+                    label4: '',
+                }
+            ]
+        }
+    }
+
+    render() {
+        return (
+            <Container>
+
+                <div className='search'>
+                    <div className='search-comp'>
+                        <ImageForm/>
+                    </div>
+                </div>
+                <div className='image-list'>
+                    <ImageList images={this.state.Images}/>
+                </div>
+                {/*<List animated verticalAlign='middle'>*/}
+                {/*{*/}
+                {/*this.state.Images.map((imageInfo) => {*/}
+                {/*return (*/}
+                {/*<ImageItem image={imageInfo}/>*/}
+                {/*)*/}
+                {/*})*/}
+                {/*}*/}
+                {/*</List>*/}
+            </Container>
+        )
+    }
+
 }
 
 export default App;
