@@ -4,16 +4,32 @@ import {Input} from 'semantic-ui-react'
 class ImageForm extends Component {
     constructor(props) {
         super(props)
+        this.onSearch = props.onSearch.bind(this)
+        this.pressSearch = this.pressSearch.bind(this)
+        this.handleUserInput = this.handleUserInput.bind(this)
+
+    }
+
+    handleUserInput(e) {
+        debugger
+        this.setState({
+            queryUrl: e.target.value
+        })
+    }
+
+    pressSearch() {
+        this.props.onSearch(this.state.queryUrl)
+
     }
 
     render() {
         return (
-            <div class="ui fluid icon input">
-                <button class="ui button">
-                    <i aria-hidden="true" class="search icon"></i>
+            <div className="ui fluid icon input">
+                <button className="ui button" onClick={this.pressSearch}>
+                    <i aria-hidden="true" className="search icon"></i>
                     Search
                 </button>
-                <input type="text" placeholder="Search..."/>
+                <input type="text" placeholder="Search..." onChange={this.handleUserInput}/>
 
             </div>
         )

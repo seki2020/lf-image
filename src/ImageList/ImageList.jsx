@@ -4,30 +4,26 @@ import ImageItem from "../ImageItem/ImageItem";
 
 
 export default class ImageList extends Component {
-    constructor(props) {
-        super(props)
-        this.images = props.images
-    }
-
-
     render() {
         return (
             <Table basic='very' celled>
                 <Table.Header>
                     <Table.Row>
-                        <Table.HeaderCell>Employee</Table.HeaderCell>
-                        <Table.HeaderCell>Correct Guesses</Table.HeaderCell>
-                        <Table.HeaderCell>Correct Guesses</Table.HeaderCell>
-                        <Table.HeaderCell>Correct Guesses</Table.HeaderCell>
-                        <Table.HeaderCell>Correct Guesses</Table.HeaderCell>
+                        <Table.HeaderCell>Image</Table.HeaderCell>
+                        <Table.HeaderCell>Label 1</Table.HeaderCell>
+                        <Table.HeaderCell>Label 2</Table.HeaderCell>
+                        <Table.HeaderCell>Label 3</Table.HeaderCell>
+                        <Table.HeaderCell>Label 4</Table.HeaderCell>
+                        <Table.HeaderCell>Label 5</Table.HeaderCell>
+                        <Table.HeaderCell>Upload Date</Table.HeaderCell>
                     </Table.Row>
                 </Table.Header>
 
                 <Table.Body>
                     {
-                        this.images.map((img) => {
+                        this.props.list.map((img, index) => {
                             return (
-                                <ImageItem image={img}/>
+                                <ImageItem image={img} key={index} onPreview={this.props.onPreview}/>
                             )
                         })
                     }
