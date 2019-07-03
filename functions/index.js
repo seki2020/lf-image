@@ -30,7 +30,7 @@ exports.getAllRecord = functions.https.onRequest((request, response) => {
                         resList.push(data);
                     });
 
-                    response.send({data: _.sortBy(resList, ['timestamp'])})
+                    response.send({data: _.orderBy(resList, ['timestamp'], ['desc'])})
                 })
                 .catch((err) => {
                     console.log('Error getting documents', err);

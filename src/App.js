@@ -1,6 +1,6 @@
 import React, {Component} from 'react';
 import './App.css';
-import {Container, Header, Image, List} from 'semantic-ui-react'
+import {Container, Dimmer,Loader} from 'semantic-ui-react'
 
 import ImageForm from './ImageForm/ImageForm'
 import ImageList from './ImageList/ImageList'
@@ -24,22 +24,26 @@ class App extends Component {
             Images: [],
             currentImg: {imgUrl: '', apiResult: []},
             modal: false,
-            uploadImage:{}
+            uploadImage:{},
+            loading:true
         }
 
         const query = firebase.functions().httpsCallable('getAllRecord', {});
         const self = this;
         query().then((res) => {
-            self.setState({"Images": res.data})
+            self.setState({"Images": res.data,loading:false})
         })
 
         this.handleSearch = this.handleSearch.bind(this)
         this.imagePreviewFunc = this.imagePreviewFunc.bind(this)
         this.toggleModal = this.toggleModal.bind(this)
 
+
+
     }
 
     handleSearch(keyword, type) {
+        this.setState({loading:true})
         if (type === 'url') {
             const self = this
             const queryLabel = firebase.functions().httpsCallable('detectLabel?imgUrl=' + keyword, {});
@@ -48,7 +52,7 @@ class App extends Component {
                     const previousImages = self.state.Images
                     previousImages.unshift(res.data)
 
-                    self.setState({"Images": previousImages})
+                    self.setState({"Images": previousImages,loading:false})
                 })
         } else if (type === 'file') {
             //todo...
@@ -64,7 +68,7 @@ class App extends Component {
                             const previousImages = self.state.Images
                             previousImages.unshift(res.data)
 
-                            self.setState({"Images": previousImages})
+                            self.setState({"Images": previousImages,loading:false})
                         })
 
                     });
@@ -102,6 +106,9 @@ class App extends Component {
                 <ImagePreview imagePreview={this.state.currentImg}
                               open={this.state.modal}
                               modelClose={this.toggleModal}/>
+                <Dimmer active={this.state.loading} inverted>
+                    <Loader size='large'>Loading</Loader>
+                </Dimmer>
             </Container>
         )
     }
