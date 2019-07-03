@@ -1,6 +1,6 @@
 import React, {Component} from 'react'
 import {Dropdown,Icon} from 'semantic-ui-react'
-
+import _ from 'lodash'
 import './ImageForm.css'
 
 const methodOptions = [
@@ -55,7 +55,6 @@ class ImageForm extends Component {
     }
 
     pressSearch() {
-        debugger
         if(this.state.modeVal === MODE.input){
             this.props.onSearch(this.state.queryUrl,'url')
         }else{
@@ -86,7 +85,7 @@ class ImageForm extends Component {
                            className='searchInput'
                            placeholder='...'
                            onChange={this.handleUserInput}/>
-                    <button className="ui button" onClick={this.pressSearch}>
+                    <button className="ui button" onClick={_.throttle(this.pressSearch, 2000, { 'trailing': false })}>
                         <i aria-hidden="true" className="search icon"></i>
                         {this.state.modeVal}
                     </button>
