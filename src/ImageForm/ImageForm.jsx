@@ -5,9 +5,9 @@ import './ImageForm.css'
 
 const methodOptions = [
     {
-        key: 'Search',
-        text: 'Search',
-        value: 'Search',
+        key: 'File',
+        text: 'File',
+        value: 'File',
     },
     {
         key: 'Input',
@@ -16,8 +16,12 @@ const methodOptions = [
     }];
 
 const MODE = {
-    search:'Search',
+    search:'File',
     input:'Input'
+}
+const INPUTTYPE={
+    'File':'file',
+    'Input':'text'
 }
 
 class ImageForm extends Component {
@@ -31,21 +35,31 @@ class ImageForm extends Component {
 
 
         this.state = {
-            modeVal:MODE.search
+            modeVal:MODE.search,
         }
     }
 
     handleUserInput(e) {
-        this.setState({
-            queryUrl: e.target.value
-        })
+        debugger
+        if(e.target.type === 'text'){
+            this.setState({
+                queryUrl: e.target.value
+            })
+        }
+        if(e.target.type==='file'){
+            this.setState({
+                queryUrl: e.target.files[0]
+            })
+        }
+
     }
 
     pressSearch() {
+        debugger
         if(this.state.modeVal === MODE.input){
-            this.props.onSearch(this.state.queryUrl)
+            this.props.onSearch(this.state.queryUrl,'url')
         }else{
-            alert('Search Mode WIP...')
+            this.props.onSearch(this.state.queryUrl,'file')
         }
 
     }
@@ -68,7 +82,7 @@ class ImageForm extends Component {
                         options={methodOptions}
                     />
 
-                    <input type="text"
+                    <input type={INPUTTYPE[this.state.modeVal]}
                            className='searchInput'
                            placeholder='...'
                            onChange={this.handleUserInput}/>

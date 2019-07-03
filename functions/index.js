@@ -36,13 +36,8 @@ exports.getAllRecord = functions.https.onRequest((request, response) => {
                     console.log('Error getting documents', err);
                 })
         })
-
-
-        // })
-
     }
 )
-
 
 exports.detectLabel = functions.https.onRequest((request, response) => {
 
@@ -94,3 +89,4 @@ async function callVisionApi(imgUrl) {
 async function saveResult(json) {
     return await db.collection('images').add(json);
 }
+

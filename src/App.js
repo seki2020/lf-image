@@ -11,7 +11,7 @@ import firebase from './Config/config'
 import "firebase/functions"
 import axios from 'axios'
 
-
+const storageRef = firebase.storage().ref();
 //firestore
 // import admin from 'firebase-admin'
 
@@ -23,7 +23,8 @@ class App extends Component {
             queryString: '',
             Images: [],
             currentImg: {imgUrl: '', apiResult: []},
-            modal: false
+            modal: false,
+            uploadImage:{}
         }
 
         const query = firebase.functions().httpsCallable('getAllRecord', {});
@@ -38,18 +39,39 @@ class App extends Component {
 
     }
 
-    handleSearch(keyword) {
-        const self = this
-        const queryLabel =
-            firebase.functions().httpsCallable('detectLabel?imgUrl=' + keyword, {});
-        queryLabel()
-            .then(function (res) {
-                if (!res) alert('Please input a new image url.')
-                const previousImages = self.state.Images
-                previousImages.unshift(res.data)
+    handleSearch(keyword, type) {
+        if (type === 'url') {
+            const self = this
+            const queryLabel = firebase.functions().httpsCallable('detectLabel?imgUrl=' + keyword, {});
+            queryLabel().then(function (res) {
+                    if (!res) alert('Please input a new image url.')
+                    const previousImages = self.state.Images
+                    previousImages.unshift(res.data)
 
-                self.setState({"Images": previousImages})
+                    self.setState({"Images": previousImages})
+                })
+        } else if (type === 'file') {
+            //todo...
+            const userRef = storageRef.child(keyword.name);
+            const self = this
+            userRef.put(keyword).then((snapshot)=>{
+                debugger
+                if(snapshot.state === 'success'){
+                    snapshot.ref.getDownloadURL().then(function(downloadURL) {
+                        console.log('File available at', downloadURL);
+                        const queryLabel = firebase.functions().httpsCallable('detectLabel?imgUrl=' + downloadURL, {});
+                        queryLabel().then(function (res) {
+                            const previousImages = self.state.Images
+                            previousImages.unshift(res.data)
+
+                            self.setState({"Images": previousImages})
+                        })
+
+                    });
+                }
             })
+
+        }
 
     }
 

@@ -5,7 +5,7 @@ const config = {
     authDomain: "logical-fabric.firebaseapp.com",
     databaseURL: "https://logical-fabric.firebaseio.com",
     projectId: "logical-fabric",
-    storageBucket: "",
+    storageBucket: "logical-fabric.appspot.com",
     messagingSenderId: "695552184590",
     appId: "1:695552184590:web:f220b4c04ee5e18b"
 };
