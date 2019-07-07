@@ -48,8 +48,12 @@ app.get("/images", (req, res, next) => {
 });
 
 app.post("/images/", (request, response, next) => {
+  //todo...it has different effect on Browser and postman,
+  //In Postman we use req.query.imgUrl to get params
+  //In Brower we use req.body.imgUrl
+  //It is wired !!!
   try {
-    const imageUrl = _.trim(request.query.imgUrl);
+    const imageUrl = _.trim(request.body.imgUrl || request.query.imgUrl);
     if (!imageUrl) response.send({ data: false });
     addImageByUrl(imageUrl, response);
   } catch (error) {
