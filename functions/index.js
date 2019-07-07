@@ -41,9 +41,11 @@ app.get("/images/:imageId", (req, res, next) => {
 // View all images
 app.get("/images", (req, res, next) => {
   // return cors(req, res, () => {
-  firebaseHelper.firestore
-    .backup(db, IMAGECOLLECTION)
-    .then(data => res.status(200).send(data));
+
+  firebaseHelper.firestore.backup(db, IMAGECOLLECTION).then(data => {
+    console.log("data", data);
+    res.status(200).send(_.values(data.images));
+  });
   // })
 });
 
