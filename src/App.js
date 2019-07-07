@@ -11,6 +11,8 @@ import firebase from "./Config/config";
 import "firebase/functions";
 import axios from "axios";
 
+const DOMAIN = "https://us-central1-logical-fabric.cloudfunctions.net/";
+
 const storageRef = firebase.storage().ref();
 //firestore
 // import admin from 'firebase-admin'
@@ -27,9 +29,13 @@ class App extends Component {
       loading: true
     };
 
-    const query = firebase.functions().httpsCallable("getAllRecord", {});
+    // const query = firebase.functions().httpsCallable("getAllRecord", {});
+    // const self = this;
+    // query().then(res => {
+    //     self.setState({ Images: res.data, loading: false });
+    // });
     const self = this;
-    query().then(res => {
+    axios.get(DOMAIN + "/webApi/api/v1/images").then(res => {
       self.setState({ Images: res.data, loading: false });
     });
 
@@ -42,16 +48,18 @@ class App extends Component {
     this.setState({ loading: true });
     if (type === "url") {
       const self = this;
-      const queryLabel = firebase
-        .functions()
-        .httpsCallable("detectLabel?imgUrl=" + keyword, {});
-      queryLabel().then(function(res) {
-        if (!res) alert("Please input a new image url.");
-        const previousImages = self.state.Images;
-        previousImages.unshift(res.data);
 
-        self.setState({ Images: previousImages, loading: false });
-      });
+      axios
+        .post(DOMAIN + "/webApi/api/v1/images", {
+          imgUrl: keyword
+        })
+        .then(res => {
+          if (!res.data) alert("Please input a new image url.");
+          let preState = self.state.Images;
+          preState.unshift(res.data);
+
+          self.setState({ Images: preState, loading: false });
+        });
     } else if (type === "file") {
       //todo...
       const userRef = storageRef.child(keyword.name);
