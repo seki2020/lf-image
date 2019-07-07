@@ -1,92 +1,95 @@
-const admin = require('firebase-admin');
-// const serviceAccount = require('C:\\firebase-keys\\logical-fabric-firebase-adminsdk-r2757-02edf22e43.json')
-const functions = require('firebase-functions');
+const serviceAccount = require("C:\\firebase-keys\\logical-fabric-firebase-adminsdk-r2757-02edf22e43.json");
+const _ = require("lodash");
 
-// Imports the Google Cloud client library
-const vision = require('@google-cloud/vision');
-const cors = require('cors')({origin: true});
-const _ = require('lodash')
+const functions = require("firebase-functions");
+const admin = require("firebase-admin");
+const firebaseHelper = require("firebase-functions-helper");
+const express = require("express");
+const bodyParser = require("body-parser");
 
-// const cors = require('cors')({
-//     origin: true
-// });
+const vision = require("@google-cloud/vision");
+const CLIENT = new vision.ImageAnnotatorClient();
 
-// Creates a client
-const client = new vision.ImageAnnotatorClient();
-admin.initializeApp()
-// admin.initializeApp({
-//     credential: admin.credential.cert(serviceAccount)
-// });
+// admin.initializeApp(functions.config().firebase)
+admin.initializeApp({
+  credential: admin.credential.cert(serviceAccount)
+});
 
-let db = admin.firestore();
+const db = admin.firestore();
 
-exports.getAllRecord = functions.https.onRequest((request, response) => {
-        return cors(request, response, () => {
-            db.collection('images').get()
-                .then((snapshot) => {
-                    let resList = [];
-                    snapshot.forEach((doc) => {
-                        const data = doc.data()
-                        resList.push(data);
-                    });
+const app = express();
+const main = express();
+const cors = require("cors");
 
-                    response.send({data: _.orderBy(resList, ['timestamp'], ['desc'])})
-                })
-                .catch((err) => {
-                    console.log('Error getting documents', err);
-                })
-        })
-    }
-)
+app.use(cors({ origin: true }));
 
-exports.detectLabel = functions.https.onRequest((request, response) => {
+//redirect url
+main.use("/api/v1", app);
+main.use(bodyParser.json());
+main.use(bodyParser.urlencoded({ extended: false }));
 
-    return cors(request, response, () => {
+const IMAGECOLLECTION = "images";
 
-        try {
-            const imageUrl = _.trim(request.query.imgUrl);
-            if (!imageUrl) response.send({data: false});
-            callVisionApi(imageUrl).then((labelDetail) => {
-                //todo... check api status
-                if (!labelDetail[0].labelAnnotations) response.send({data: false});
+exports.webApi = functions.https.onRequest(main);
 
-                console.log('labelDetail', labelDetail);
-                const record = {
-                    imgUrl: imageUrl,
-                    timestamp: _.now(),
-                    apiResult: labelDetail[0].labelAnnotations
-                }
-                console.log('record', record)
-                saveResult(record).then((ref) => {
+app.get("/images/:imageId", (req, res, next) => {
+  firebaseHelper.firestore
+    .getDocument(db, IMAGECOLLECTION, req.params.imageId)
+    .then(doc => res.status(200).send(doc));
+});
 
-                    console.log('saveResult', ref)
-                    record.id = ref.id
-                    db.collection('images').doc(ref.id).get().then(doc => {
-                        response.send({data: doc.data()})
-                    })
-                });
+// View all images
+app.get("/images", (req, res, next) => {
+  // return cors(req, res, () => {
+  firebaseHelper.firestore
+    .backup(db, IMAGECOLLECTION)
+    .then(data => res.status(200).send(data));
+  // })
+});
 
+app.post("/images/", (request, response, next) => {
+  try {
+    const imageUrl = _.trim(request.query.imgUrl);
+    if (!imageUrl) response.send({ data: false });
+    addImageByUrl(imageUrl, response);
+  } catch (error) {
+    console.log(error);
+  }
+});
 
-            })
-        } catch (error) {
-            console.log(error);
-        }
-    })
-
-    // })
-
-
-})
-
-
-async function callVisionApi(imgUrl) {
-
-
-    // Performs label detection on the image file
-    return await client.labelDetection(imgUrl);
+function labelDetectionAsync(imageUrl) {
+  return new Promise(resolve => {
+    resolve(CLIENT.labelDetection(imageUrl));
+  });
 }
 
-async function saveResult(json) {
-    return await db.collection('images').add(json);
+function saveResultAsync(json) {
+  return new Promise(resolve => {
+    resolve(
+      firebaseHelper.firestore.createNewDocument(db, IMAGECOLLECTION, json)
+    );
+  });
+}
+function getDocById(id) {
+  return new Promise(resolve => {
+    resolve(firebaseHelper.firestore.getDocument(db, IMAGECOLLECTION, id));
+  });
 }
 
+async function addImageByUrl(imageUrl, response) {
+  const labels = await labelDetectionAsync(imageUrl);
+  const annotations = labels[0].labelAnnotations;
+  console.log("labels", annotations);
+
+  const record = {
+    imgUrl: imageUrl,
+    timestamp: _.now(),
+    apiResult: annotations
+  };
+  const refId = await saveResultAsync(record);
+  console.log("refId", refId.id);
+
+  const newRec = await getDocById(refId.id);
+
+  response.send(newRec);
+}
