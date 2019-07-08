@@ -1,25 +1,47 @@
 .search {
-
 }
 
 .search-comp {
-    padding: 100px 0;
+  padding: 100px 0;
   width: 100%;
 }
 
 .bg-image {
-    /* The image used */
-    background-image: url("./static/photographer.jpg");
+  /* The image used */
+  background-image: url("./static/photographer.jpg");
 
-    /* Add the blur effect */
-    filter: blur(8px);
-    -webkit-filter: blur(8px);
+  /* Add the blur effect */
+  filter: blur(8px);
+  -webkit-filter: blur(8px);
 
-    /* Full height */
-    height: 100%;
+  /* Full height */
+  height: 100%;
 
-    /* Center and scale the image nicely */
-    background-position: center;
-    background-repeat: no-repeat;
-    background-size: cover;
+  /* Center and scale the image nicely */
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: cover;
+}
+
+.title {
+  height: 100vh;
+  padding-top: 50vh;
+}
+.title-s {
+  padding-top: 10px;
+}
+.title-h1 {
+  font-family: "gibsonlight";
+  text-transform: uppercase;
+  animation: move 3s ease alternate;
+}
+
+@keyframes move {
+  0% {
+    transform: translate(0, 0);
+  }
+
+  100% {
+    transform: translate(0, calc(-50vh + 10px));
+  }
 }

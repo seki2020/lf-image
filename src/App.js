@@ -1,6 +1,14 @@
 import React, { Component } from "react";
 import "./App.css";
-import { Container, Dimmer, Loader } from "semantic-ui-react";
+import {
+  Container,
+  Dimmer,
+  Loader,
+  Transition,
+  Segment,
+  Label,
+  Icon
+} from "semantic-ui-react";
 
 import ImageForm from "./ImageForm/ImageForm";
 import ImageList from "./ImageList/ImageList";
@@ -23,25 +31,49 @@ class App extends Component {
     this.state = {
       queryString: "",
       Images: [],
+      BackupImages: [],
       currentImg: { imgUrl: "", apiResult: [] },
       modal: false,
       uploadImage: {},
-      loading: true
+      loading: false,
+      firstPage: true,
+      labels: [],
+      category: []
     };
-
-    // const query = firebase.functions().httpsCallable("getAllRecord", {});
-    // const self = this;
-    // query().then(res => {
-    //     self.setState({ Images: res.data, loading: false });
-    // });
     const self = this;
     axios.get(DOMAIN + "/webApi/api/v1/images").then(res => {
-      self.setState({ Images: res.data, loading: false });
+      self.setState({
+        BackupImages: res.data,
+        Images: res.data,
+        loading: false,
+        labels: this.generateLabel(res.data)
+      });
     });
+
+    setTimeout(() => {
+      self.setState({ firstPage: false });
+    }, 3000);
 
     this.handleSearch = this.handleSearch.bind(this);
     this.imagePreviewFunc = this.imagePreviewFunc.bind(this);
     this.toggleModal = this.toggleModal.bind(this);
+    this.handleLabelClick = this.handleLabelClick.bind(this);
+    this.handleFilterClear = this.handleFilterClear.bind(this);
+    // this.handleFilterRemove = this.handleFilterRemove.bind(this);
+  }
+
+  generateLabel(images) {
+    const labelSet = new Set();
+    images.forEach(img => {
+      labelSet.add(
+        img.apiResult.map(res => {
+          if (res.description) {
+            labelSet.add(res.description);
+          }
+        })
+      );
+    });
+    return Array.from(labelSet).filter(label => typeof label == "string");
   }
 
   handleSearch(keyword, type) {
@@ -65,7 +97,6 @@ class App extends Component {
       const userRef = storageRef.child(keyword.name);
       const self = this;
       userRef.put(keyword).then(snapshot => {
-        debugger;
         if (snapshot.state === "success") {
           snapshot.ref.getDownloadURL().then(function(downloadURL) {
             console.log("File available at", downloadURL);
@@ -97,20 +128,72 @@ class App extends Component {
     });
   }
 
+  handleLabelClick(e) {
+    debugger;
+    const des = e.target.text;
+    const filter = [...this.state.category, des];
+    // const mode = filter.length>0?this.state.BackImages:this.state.Images
+    this.setState({
+      category: [des],
+      Images: this.state.BackupImages.filter(image => {
+        return (
+          image.apiResult.filter(api => {
+            // return filter.filter(f => {
+            //   return api.description === f
+            // }).length > 0
+            return api.description === des;
+          }).length > 0
+        );
+      })
+    });
+  }
+  handleFilterClear() {
+    this.setState({ Images: this.state.BackupImages, category: [] });
+  }
+  // handleFilterRemove(e) {
+  //   debugger
+  //   this.setState({ category: [...this.state.category].filter(category => category != e.target.text) })
+  // }
+
   render() {
+    const { firstPage, labels, BackupImages, category } = this.state;
     return (
       <Container>
-        <div className="search">
-          <div className="search-comp">
-            <ImageForm onSearch={this.handleSearch} />
-          </div>
+        <div className={firstPage ? "title" : "title-s"}>
+          {/* <div className={firstPage?'title':'title'} > */}
+          <h1 className="title-h1">Label Detect</h1>
         </div>
-        <div className="image-list">
+        <Segment>
+          <ImageForm onSearch={this.handleSearch} />
+        </Segment>
+
+        <Segment>
+          {/* <Label as="a" color="red" onClick={this.handleFilterClear}>CLEAR FILTER</Label> */}
+          {category.map((label, index) => {
+            return (
+              <Label as="a" key={index} onClick={this.handleFilterClear}>
+                {label}
+                <Icon name="close" />
+              </Label>
+            );
+          })}
+        </Segment>
+        <Label.Group color="blue">
+          {labels.map((label, index) => {
+            return (
+              <Label as="a" key={index} onClick={this.handleLabelClick}>
+                {label}
+              </Label>
+            );
+          })}
+        </Label.Group>
+        <Segment>
           <ImageList
             list={this.state.Images}
             onPreview={this.imagePreviewFunc}
           />
-        </div>
+        </Segment>
+
         <ImagePreview
           imagePreview={this.state.currentImg}
           open={this.state.modal}

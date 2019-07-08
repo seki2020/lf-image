@@ -1,0 +1,15 @@
+.description {
+  font-weight: bold;
+  margin: 0;
+}
+@media all and (max-width: 767px) {
+  .responsive-image {
+    width: 100%;
+  }
+}
+
+@media all and (min-width: 767px) {
+  .responsive-image {
+    width: 100px;
+  }
+}
