@@ -1,6 +1,14 @@
 import React, { Component } from "react";
 import "./App.css";
-import { Container, Dimmer, Loader } from "semantic-ui-react";
+import {
+  Container,
+  Dimmer,
+  Loader,
+  Transition,
+  Segment,
+  Label,
+  Icon
+} from "semantic-ui-react";
 
 import ImageForm from "./ImageForm/ImageForm";
 import ImageList from "./ImageList/ImageList";
@@ -26,7 +34,8 @@ class App extends Component {
       currentImg: { imgUrl: "", apiResult: [] },
       modal: false,
       uploadImage: {},
-      loading: true
+      loading: false,
+      firstPage: true
     };
 
     // const query = firebase.functions().httpsCallable("getAllRecord", {});
@@ -38,6 +47,10 @@ class App extends Component {
     axios.get(DOMAIN + "/webApi/api/v1/images").then(res => {
       self.setState({ Images: res.data, loading: false });
     });
+
+    setTimeout(() => {
+      self.setState({ firstPage: false });
+    }, 3000);
 
     this.handleSearch = this.handleSearch.bind(this);
     this.imagePreviewFunc = this.imagePreviewFunc.bind(this);
@@ -98,19 +111,33 @@ class App extends Component {
   }
 
   render() {
+    const { firstPage } = this.state;
     return (
       <Container>
-        <div className="search">
-          <div className="search-comp">
-            <ImageForm onSearch={this.handleSearch} />
-          </div>
+        <div className={firstPage ? "title" : "title-s"}>
+          {/* <div className={firstPage?'title':'title'} > */}
+          <h1 className="title-h1">Label Detect</h1>
         </div>
-        <div className="image-list">
+        <Segment>
+          <ImageForm onSearch={this.handleSearch} />
+        </Segment>
+
+        <Label.Group color="blue">
+          <Label as="a">
+            Happy
+            <Label.Detail>22</Label.Detail>
+          </Label>
+          <Label as="a">Smart</Label>
+          <Label as="a">Insane</Label>
+          <Label as="a">Exciting</Label>
+        </Label.Group>
+        <Segment>
           <ImageList
             list={this.state.Images}
             onPreview={this.imagePreviewFunc}
           />
-        </div>
+        </Segment>
+
         <ImagePreview
           imagePreview={this.state.currentImg}
           open={this.state.modal}
