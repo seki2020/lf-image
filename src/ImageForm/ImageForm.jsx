@@ -68,7 +68,7 @@ class ImageForm extends Component {
   render() {
     return (
       <Grid textAlign="center" divided stackable columns={3}>
-        <Grid.Column stretched="true" mobile="3">
+        <Grid.Column stretched mobile="3">
           <Dropdown
             placeholder="Select Friend"
             selection

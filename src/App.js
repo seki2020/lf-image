@@ -31,21 +31,23 @@ class App extends Component {
     this.state = {
       queryString: "",
       Images: [],
+      BackupImages: [],
       currentImg: { imgUrl: "", apiResult: [] },
       modal: false,
       uploadImage: {},
       loading: false,
-      firstPage: true
+      firstPage: true,
+      labels: [],
+      category: []
     };
-
-    // const query = firebase.functions().httpsCallable("getAllRecord", {});
-    // const self = this;
-    // query().then(res => {
-    //     self.setState({ Images: res.data, loading: false });
-    // });
     const self = this;
     axios.get(DOMAIN + "/webApi/api/v1/images").then(res => {
-      self.setState({ Images: res.data, loading: false });
+      self.setState({
+        BackupImages: res.data,
+        Images: res.data,
+        loading: false,
+        labels: this.generateLabel(res.data)
+      });
     });
 
     setTimeout(() => {
@@ -55,6 +57,23 @@ class App extends Component {
     this.handleSearch = this.handleSearch.bind(this);
     this.imagePreviewFunc = this.imagePreviewFunc.bind(this);
     this.toggleModal = this.toggleModal.bind(this);
+    this.handleLabelClick = this.handleLabelClick.bind(this);
+    this.handleFilterClear = this.handleFilterClear.bind(this);
+    // this.handleFilterRemove = this.handleFilterRemove.bind(this);
+  }
+
+  generateLabel(images) {
+    const labelSet = new Set();
+    images.forEach(img => {
+      labelSet.add(
+        img.apiResult.map(res => {
+          if (res.description) {
+            labelSet.add(res.description);
+          }
+        })
+      );
+    });
+    return Array.from(labelSet).filter(label => typeof label == "string");
   }
 
   handleSearch(keyword, type) {
@@ -78,7 +97,6 @@ class App extends Component {
       const userRef = storageRef.child(keyword.name);
       const self = this;
       userRef.put(keyword).then(snapshot => {
-        debugger;
         if (snapshot.state === "success") {
           snapshot.ref.getDownloadURL().then(function(downloadURL) {
             console.log("File available at", downloadURL);
@@ -110,8 +128,35 @@ class App extends Component {
     });
   }
 
+  handleLabelClick(e) {
+    debugger;
+    const des = e.target.text;
+    const filter = [...this.state.category, des];
+    // const mode = filter.length>0?this.state.BackImages:this.state.Images
+    this.setState({
+      category: [des],
+      Images: this.state.BackupImages.filter(image => {
+        return (
+          image.apiResult.filter(api => {
+            // return filter.filter(f => {
+            //   return api.description === f
+            // }).length > 0
+            return api.description === des;
+          }).length > 0
+        );
+      })
+    });
+  }
+  handleFilterClear() {
+    this.setState({ Images: this.state.BackupImages, category: [] });
+  }
+  // handleFilterRemove(e) {
+  //   debugger
+  //   this.setState({ category: [...this.state.category].filter(category => category != e.target.text) })
+  // }
+
   render() {
-    const { firstPage } = this.state;
+    const { firstPage, labels, BackupImages, category } = this.state;
     return (
       <Container>
         <div className={firstPage ? "title" : "title-s"}>
@@ -122,14 +167,25 @@ class App extends Component {
           <ImageForm onSearch={this.handleSearch} />
         </Segment>
 
+        <Segment>
+          {/* <Label as="a" color="red" onClick={this.handleFilterClear}>CLEAR FILTER</Label> */}
+          {category.map((label, index) => {
+            return (
+              <Label as="a" key={index} onClick={this.handleFilterClear}>
+                {label}
+                <Icon name="close" />
+              </Label>
+            );
+          })}
+        </Segment>
         <Label.Group color="blue">
-          <Label as="a">
-            Happy
-            <Label.Detail>22</Label.Detail>
-          </Label>
-          <Label as="a">Smart</Label>
-          <Label as="a">Insane</Label>
-          <Label as="a">Exciting</Label>
+          {labels.map((label, index) => {
+            return (
+              <Label as="a" key={index} onClick={this.handleLabelClick}>
+                {label}
+              </Label>
+            );
+          })}
         </Label.Group>
         <Segment>
           <ImageList
