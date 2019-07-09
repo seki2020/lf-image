@@ -37,3 +37,4 @@ yarn-error.log*
 
 public/*
 functions/config/config.json
+firebase-debug.log
