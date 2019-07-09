@@ -59,7 +59,7 @@ class App extends Component {
     this.toggleModal = this.toggleModal.bind(this);
     this.handleLabelClick = this.handleLabelClick.bind(this);
     this.handleFilterClear = this.handleFilterClear.bind(this);
-    // this.handleFilterRemove = this.handleFilterRemove.bind(this);
+    this.handleFilterRemove = this.handleFilterRemove.bind(this);
   }
 
   generateLabel(images) {
@@ -126,16 +126,14 @@ class App extends Component {
   handleLabelClick(e) {
     debugger;
     const des = e.target.text;
+    const { Images } = this.state;
     const filter = [...this.state.category, des];
     // const mode = filter.length>0?this.state.BackImages:this.state.Images
     this.setState({
-      category: [des],
-      Images: this.state.BackupImages.filter(image => {
+      category: filter,
+      Images: Images.filter(image => {
         return (
           image.apiResult.filter(api => {
-            // return filter.filter(f => {
-            //   return api.description === f
-            // }).length > 0
             return api.description === des;
           }).length > 0
         );
@@ -145,13 +143,35 @@ class App extends Component {
   handleFilterClear() {
     this.setState({ Images: this.state.BackupImages, category: [] });
   }
-  // handleFilterRemove(e) {
-  //   debugger
-  //   this.setState({ category: [...this.state.category].filter(category => category != e.target.text) })
-  // }
+  handleFilterRemove(e) {
+    debugger;
+    this.setState({
+      category: [...this.state.category].filter(
+        category => category != e.target.text
+      )
+    });
+  }
 
   render() {
     const { firstPage, labels, BackupImages, category } = this.state;
+
+    let closeBtn;
+    if (category.length > 0) {
+      closeBtn = (
+        <Segment>
+          {category.map((label, index) => {
+            return (
+              <Label as="a" key={index}>
+                {label}
+              </Label>
+            );
+          })}
+          <Label as="a" onClick={this.handleFilterClear}>
+            <Icon name="close" />
+          </Label>
+        </Segment>
+      );
+    }
     return (
       <Container>
         <div className={firstPage ? "title" : "title-s"}>
@@ -161,17 +181,8 @@ class App extends Component {
         <Segment>
           <ImageForm onSearch={this.handleSearch} />
         </Segment>
+        {closeBtn}
 
-        {/* <Segment>
-          {category.map((label, index) => {
-            return (
-              <Label as="a" key={index} onClick={this.handleFilterClear}>
-                {label}
-                <Icon name="close" />
-              </Label>
-            );
-          })}
-        </Segment> */}
         <Label.Group color="blue">
           {labels.map((label, index) => {
             return (
