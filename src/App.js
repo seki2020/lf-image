@@ -73,46 +73,41 @@ class App extends Component {
         })
       );
     });
+
     return Array.from(labelSet).filter(label => typeof label == "string");
   }
 
   handleSearch(keyword, type) {
     this.setState({ loading: true });
     if (type === "url") {
-      const self = this;
-
-      axios
-        .post(DOMAIN + "/webApi/api/v1/images", {
-          imgUrl: keyword
-        })
-        .then(res => {
-          if (!res.data) alert("Please input a new image url.");
-          let preState = self.state.Images;
-          preState.unshift(res.data);
-
-          self.setState({ Images: preState, loading: false });
-        });
+      this.callDetectLabelApi(keyword, this);
     } else if (type === "file") {
-      //todo...
       const userRef = storageRef.child(keyword.name);
       const self = this;
       userRef.put(keyword).then(snapshot => {
         if (snapshot.state === "success") {
           snapshot.ref.getDownloadURL().then(function(downloadURL) {
             console.log("File available at", downloadURL);
-            const queryLabel = firebase
-              .functions()
-              .httpsCallable("detectLabel?imgUrl=" + downloadURL, {});
-            queryLabel().then(function(res) {
-              const previousImages = self.state.Images;
-              previousImages.unshift(res.data);
 
-              self.setState({ Images: previousImages, loading: false });
-            });
+            self.callDetectLabelApi(downloadURL, self);
           });
         }
       });
     }
+  }
+
+  callDetectLabelApi(imgUrl, self) {
+    axios
+      .post(DOMAIN + "/webApi/api/v1/images", {
+        imgUrl: imgUrl
+      })
+      .then(res => {
+        if (!res.data) alert("Please input a new image url.");
+        let preState = self.state.Images;
+        preState.unshift(res.data);
+
+        self.setState({ Images: preState, loading: false });
+      });
   }
 
   imagePreviewFunc(imgObj) {
@@ -167,8 +162,7 @@ class App extends Component {
           <ImageForm onSearch={this.handleSearch} />
         </Segment>
 
-        <Segment>
-          {/* <Label as="a" color="red" onClick={this.handleFilterClear}>CLEAR FILTER</Label> */}
+        {/* <Segment>
           {category.map((label, index) => {
             return (
               <Label as="a" key={index} onClick={this.handleFilterClear}>
@@ -177,7 +171,7 @@ class App extends Component {
               </Label>
             );
           })}
-        </Segment>
+        </Segment> */}
         <Label.Group color="blue">
           {labels.map((label, index) => {
             return (
