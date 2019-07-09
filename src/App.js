@@ -38,6 +38,7 @@ class App extends Component {
       loading: false,
       firstPage: true,
       labels: [],
+      labelsBackup: [],
       category: []
     };
     const self = this;
@@ -46,7 +47,8 @@ class App extends Component {
         BackupImages: res.data,
         Images: res.data,
         loading: false,
-        labels: this.generateLabel(res.data)
+        labels: this.generateLabel(res.data),
+        labelsBackup: this.generateLabel(res.data)
       });
     });
 
@@ -60,6 +62,7 @@ class App extends Component {
     this.handleLabelClick = this.handleLabelClick.bind(this);
     this.handleFilterClear = this.handleFilterClear.bind(this);
     this.handleFilterRemove = this.handleFilterRemove.bind(this);
+    this.handleUserSearch = this.handleUserSearch.bind(this);
   }
 
   generateLabel(images) {
@@ -151,6 +154,23 @@ class App extends Component {
       )
     });
   }
+  handleUserSearch(e) {
+    const searchStr = e.target.value;
+    const { labels, labelsBackup } = this.state;
+    if (!searchStr) {
+      this.setState({ labels: [...labelsBackup] });
+    }
+    if (searchStr.length >= 1) {
+      const resLabels = labelsBackup.filter(
+        label =>
+          label
+            .toLowerCase()
+            .trim()
+            .indexOf(searchStr.toLowerCase().trim()) > -1
+      );
+      this.setState({ labels: resLabels });
+    }
+  }
 
   render() {
     const { firstPage, labels, BackupImages, category } = this.state;
@@ -158,7 +178,7 @@ class App extends Component {
     let closeBtn;
     if (category.length > 0) {
       closeBtn = (
-        <Segment>
+        <span>
           {category.map((label, index) => {
             return (
               <Label as="a" key={index}>
@@ -169,7 +189,7 @@ class App extends Component {
           <Label as="a" onClick={this.handleFilterClear}>
             <Icon name="close" />
           </Label>
-        </Segment>
+        </span>
       );
     }
     return (
@@ -181,8 +201,16 @@ class App extends Component {
         <Segment>
           <ImageForm onSearch={this.handleSearch} />
         </Segment>
-        {closeBtn}
-
+        <Segment>
+          <div className="ui icon input m-right-10">
+            <input
+              className="searchInput"
+              placeholder="Search"
+              onChange={this.handleUserSearch}
+            />
+          </div>
+          {closeBtn}
+        </Segment>
         <Label.Group color="blue">
           {labels.map((label, index) => {
             return (

@@ -5,20 +5,20 @@ import "./ImageForm.css";
 
 const methodOptions = [
   {
+    key: "Url",
+    text: "Url",
+    value: "Url"
+  },
+  {
     key: "File",
     text: "File",
     value: "File"
-  },
-  {
-    key: "Input",
-    text: "Input",
-    value: "Input"
   }
 ];
 
 const MODE = {
-  search: "File",
-  input: "Input"
+  input: "Input",
+  search: "File"
 };
 const INPUTTYPE = {
   File: "file",
@@ -83,7 +83,7 @@ class ImageForm extends Component {
             <input
               type={INPUTTYPE[this.state.modeVal]}
               className="searchInput"
-              placeholder="..."
+              placeholder=""
               onChange={this.handleUserInput}
             />
           </div>
