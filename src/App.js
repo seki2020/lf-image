@@ -19,7 +19,8 @@ import firebase from "./Config/config";
 import "firebase/functions";
 import axios from "axios";
 
-const DOMAIN = "https://us-central1-logical-fabric.cloudfunctions.net/";
+// const DOMAIN = "https://us-central1-logical-fabric.cloudfunctions.net/";
+const DOMAIN = "http://localhost:5000/logical-fabric/us-central1";
 
 const storageRef = firebase.storage().ref();
 //firestore

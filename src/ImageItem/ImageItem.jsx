@@ -34,7 +34,9 @@ class ImageItem extends Component {
           }
         })}
         <Table.Cell>
-          <p>{new moment(this.props.timestamp).format("YYYY-M-D hh:mm")}</p>
+          <p>
+            {new moment(this.props.image.timestamp).format("YYYY-M-D hh:mm")}
+          </p>
         </Table.Cell>
       </Table.Row>
     );

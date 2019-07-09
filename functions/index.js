@@ -1,4 +1,4 @@
-// const serviceAccount = require("C:\\firebase-keys\\logical-fabric-firebase-adminsdk-r2757-02edf22e43.json");
+const serviceAccount = require("C:\\firebase-keys\\logical-fabric-firebase-adminsdk-r2757-02edf22e43.json");
 const _ = require("lodash");
 
 const functions = require("firebase-functions");
@@ -10,10 +10,10 @@ const bodyParser = require("body-parser");
 const vision = require("@google-cloud/vision");
 const CLIENT = new vision.ImageAnnotatorClient();
 
-admin.initializeApp(functions.config().firebase);
-// admin.initializeApp({
-//   credential: admin.credential.cert(serviceAccount)
-// });
+// admin.initializeApp(functions.config().firebase);
+admin.initializeApp({
+  credential: admin.credential.cert(serviceAccount)
+});
 
 const db = admin.firestore();
 
@@ -42,10 +42,14 @@ app.get("/images/:imageId", (req, res, next) => {
 app.get("/images", (req, res, next) => {
   // return cors(req, res, () => {
 
-  firebaseHelper.firestore.backup(db, IMAGECOLLECTION).then(data => {
-    console.log("data", data);
-    res.status(200).send(_.values(data.images));
-  });
+  // firebaseHelper.firestore.backup(db, IMAGECOLLECTION).then(data => {
+  firebaseHelper.firestore
+    .queryData(db, IMAGECOLLECTION, [], ["timestamp", "desc"])
+    .then(data => {
+      console.log("data", data);
+      // res.status(200).send(_.values(data.images));
+      res.status(200).send(_.values(data));
+    });
   // })
 });
 
