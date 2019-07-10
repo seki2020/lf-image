@@ -238,6 +238,7 @@ class App extends Component {
         // Handle Errors here.
         var errorCode = error.code
         var errorMessage = error.message
+        alert(error.message)
         // ...
       })
   }
@@ -262,9 +263,6 @@ class App extends Component {
           } else {
             alert(errorMessage)
           }
-          console.log(error)
-          // document.getElementById('quickstart-sign-in').disabled = false;
-          // [END_EXCLUDE]
         })
     }
   }
@@ -281,7 +279,6 @@ class App extends Component {
           toggleSignIn={this.toggleSignIn}
         />
         <ImageForm onSearch={this.handleSearch} />
-        r
         <Filter
           category={category}
           handleUserSearch={this.handleUserSearch}
