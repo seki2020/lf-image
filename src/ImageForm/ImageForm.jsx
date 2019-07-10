@@ -17,7 +17,7 @@ const methodOptions = [
 ];
 
 const MODE = {
-  input: "Input",
+  input: "Url",
   search: "File"
 };
 const INPUTTYPE = {
@@ -78,7 +78,7 @@ class ImageForm extends Component {
             options={methodOptions}
           />
         </Grid.Column>
-        <Grid.Column stretched="true" mobile="10">
+        <Grid.Column stretched mobile="10">
           <div className="ui fluid icon input">
             <input
               type={INPUTTYPE[this.state.modeVal]}
@@ -88,7 +88,7 @@ class ImageForm extends Component {
             />
           </div>
         </Grid.Column>
-        <Grid.Column stretched="true" mobile="3">
+        <Grid.Column stretched mobile="3">
           <button
             className="ui button"
             onClick={_.throttle(this.pressSearch, 2000, { trailing: false })}
