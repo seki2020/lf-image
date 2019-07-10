@@ -4,9 +4,16 @@ import {
   Container,
   Dimmer,
   Loader,
-  Transition,
+  Modal,
+  Button,
   Segment,
   Label,
+  Image,
+  Form,
+  Input,
+  Menu,
+  Divider,
+  Header,
   Icon
 } from "semantic-ui-react";
 
@@ -19,8 +26,8 @@ import firebase from "./Config/config";
 import "firebase/functions";
 import axios from "axios";
 
-// const DOMAIN = "https://us-central1-logical-fabric.cloudfunctions.net/";
-const DOMAIN = "http://localhost:5000/logical-fabric/us-central1";
+const DOMAIN = "https://us-central1-logical-fabric.cloudfunctions.net/";
+// const DOMAIN = "http://localhost:5000/logical-fabric/us-central1";
 
 const storageRef = firebase.storage().ref();
 //firestore
@@ -40,22 +47,53 @@ class App extends Component {
       firstPage: true,
       labels: [],
       labelsBackup: [],
-      category: []
+      category: [],
+      userInfo: {}
     };
     const self = this;
-    axios.get(DOMAIN + "/webApi/api/v1/images").then(res => {
-      self.setState({
-        BackupImages: res.data,
-        Images: res.data,
-        loading: false,
-        labels: this.generateLabel(res.data),
-        labelsBackup: this.generateLabel(res.data)
-      });
-    });
 
     setTimeout(() => {
       self.setState({ firstPage: false });
     }, 3000);
+
+    firebase.auth().onAuthStateChanged(function(user) {
+      if (user) {
+        // User is signed in.
+        console.log("User sign in");
+        self.setState({ userInfo: user });
+
+        firebase
+          .auth()
+          .currentUser.getIdToken(/* forceRefresh */ true)
+          .then(TOKEN => {
+            axios
+              .get(DOMAIN + "/webApi/api/v1/images?idToken=" + TOKEN)
+              .then(res => {
+                if (res.status == 200) {
+                  self.setState({
+                    BackupImages: res.data,
+                    Images: res.data,
+                    loading: false,
+                    labels: self.generateLabel(res.data),
+                    labelsBackup: self.generateLabel(res.data)
+                  });
+                } else {
+                  console.log("get images error");
+                }
+              });
+          });
+      } else {
+        console.log("User sign out");
+        self.setState({
+          userInfo: {},
+          Images: [],
+          BackupImages: [],
+          category: [],
+          labels: [],
+          labelsBackup: []
+        });
+      }
+    });
 
     this.handleSearch = this.handleSearch.bind(this);
     this.imagePreviewFunc = this.imagePreviewFunc.bind(this);
@@ -64,6 +102,7 @@ class App extends Component {
     this.handleFilterClear = this.handleFilterClear.bind(this);
     this.handleFilterRemove = this.handleFilterRemove.bind(this);
     this.handleUserSearch = this.handleUserSearch.bind(this);
+    this.onSignUpSubmit = this.onSignUpSubmit.bind(this);
   }
 
   generateLabel(images) {
@@ -82,35 +121,52 @@ class App extends Component {
   }
 
   handleSearch(keyword, type) {
-    this.setState({ loading: true });
-    if (type === "url") {
-      this.callDetectLabelApi(keyword, this);
-    } else if (type === "file") {
-      const userRef = storageRef.child(keyword.name);
-      const self = this;
-      userRef.put(keyword).then(snapshot => {
-        if (snapshot.state === "success") {
-          snapshot.ref.getDownloadURL().then(function(downloadURL) {
-            console.log("File available at", downloadURL);
-
-            self.callDetectLabelApi(downloadURL, self);
-          });
-        }
-      });
+    if (!firebase.auth().currentUser) {
+      alert("Please Login and try again.");
+      return;
     }
+
+    firebase
+      .auth()
+      .currentUser.getIdToken(/* forceRefresh */ true)
+      .then(
+        TOKEN => {
+          this.setState({ loading: true });
+          if (type === "url") {
+            this.callDetectLabelApi(keyword, this, TOKEN);
+          } else if (type === "file") {
+            const userRef = storageRef.child(keyword.name);
+            const self = this;
+            userRef.put(keyword).then(snapshot => {
+              if (snapshot.state === "success") {
+                snapshot.ref.getDownloadURL().then(function(downloadURL) {
+                  console.log("File available at", downloadURL);
+
+                  self.callDetectLabelApi(downloadURL, self, TOKEN);
+                });
+              }
+            });
+          }
+        },
+        error => alert(error)
+      );
   }
 
-  callDetectLabelApi(imgUrl, self) {
+  callDetectLabelApi(imgUrl, self, idToken) {
     axios
       .post(DOMAIN + "/webApi/api/v1/images", {
-        imgUrl: imgUrl
+        imgUrl: imgUrl,
+        idToken: idToken
       })
       .then(res => {
-        if (!res.data) alert("Please input a new image url.");
-        let preState = self.state.Images;
-        preState.unshift(res.data);
+        if (res.status == 200) {
+          let preState = self.state.Images;
+          preState.unshift(res.data);
 
-        self.setState({ Images: preState, loading: false });
+          self.setState({ Images: preState, loading: false });
+        } else {
+          alert("Please input a new image url.");
+        }
       });
   }
 
@@ -128,7 +184,6 @@ class App extends Component {
   }
 
   handleLabelClick(e) {
-    debugger;
     const des = e.target.text;
     const { Images } = this.state;
     const filter = [...this.state.category, des];
@@ -173,8 +228,109 @@ class App extends Component {
     }
   }
 
+  onSignUpSubmit(e) {
+    e.preventDefault();
+    debugger;
+    const username = document.querySelector("#signup-username").value;
+    const psd = document.querySelector("#signup-password").value;
+
+    firebase
+      .auth()
+      .createUserWithEmailAndPassword(username, psd)
+      .catch(function(error) {
+        // Handle Errors here.
+        var errorCode = error.code;
+        var errorMessage = error.message;
+        // ...
+      });
+  }
+  toggleSignIn() {
+    if (firebase.auth().currentUser) {
+      // [START signout]
+      firebase.auth().signOut();
+      // [END signout]
+    } else {
+      const username = document.querySelector("#login-username").value;
+      const psd = document.querySelector("#login-password").value;
+      firebase
+        .auth()
+        .signInWithEmailAndPassword(username, psd)
+        .catch(function(error) {
+          // Handle Errors here.
+          var errorCode = error.code;
+          var errorMessage = error.message;
+          // [START_EXCLUDE]
+          if (errorCode === "auth/wrong-password") {
+            alert("Wrong password.");
+          } else {
+            alert(errorMessage);
+          }
+          console.log(error);
+          // document.getElementById('quickstart-sign-in').disabled = false;
+          // [END_EXCLUDE]
+        });
+    }
+  }
+
   render() {
     const { firstPage, labels, BackupImages, category } = this.state;
+
+    const SignUpModal = () => (
+      <Modal trigger={<Button>Sign Up</Button>}>
+        <Modal.Header>Sign Up</Modal.Header>
+        <Modal.Content>
+          <Form>
+            <Form.Group widths="equal">
+              <Form.Field
+                label="Username"
+                id="signup-username"
+                control="input"
+                placeholder=""
+              />
+              <Form.Field
+                label="Password"
+                id="signup-password"
+                control="input"
+                placeholder=""
+              />
+            </Form.Group>
+            <Button type="submit" onClick={this.onSignUpSubmit}>
+              Submit
+            </Button>
+            <Button type="reset">Cancel</Button>
+            <Divider hidden />
+          </Form>
+        </Modal.Content>
+      </Modal>
+    );
+    const LoginModal = () => (
+      <Modal trigger={<Button>Login</Button>}>
+        <Modal.Header>Login</Modal.Header>
+        <Modal.Content>
+          <Form>
+            <Form.Group widths="equal">
+              <Form.Field
+                label="Username"
+                id="login-username"
+                control="input"
+                placeholder=""
+              />
+              <Form.Field
+                label="Password"
+                id="login-password"
+                control="input"
+                placeholder=""
+              />
+            </Form.Group>
+            <Button type="submit" onClick={this.toggleSignIn}>
+              Submit
+            </Button>
+            <Button type="reset">Cancel</Button>
+            <Divider hidden />
+          </Form>
+        </Modal.Content>
+      </Modal>
+    );
 
     let closeBtn;
     if (category.length > 0) {
@@ -193,12 +349,44 @@ class App extends Component {
         </span>
       );
     }
+
+    // const userHeader = () => (
+    //   <Header as='h2'>
+    //     <Image circular src='https://firebasestorage.googleapis.com/v0/b/logical-fabric.appspot.com/o/usermanage%2Fpatrick.png?alt=media&token=df041a6b-8856-4d41-a5c0-8bc4d9583c8c' />
+    //     {this.state.user.email}
+    //   </Header>
+    // )
+    let UserInfo;
+    if (this.state.userInfo.email) {
+      UserInfo = (
+        <Header>
+          <Image
+            className="m-right-10"
+            circular
+            src="https://firebasestorage.googleapis.com/v0/b/logical-fabric.appspot.com/o/usermanage%2Fpatrick.png?alt=media&token=df041a6b-8856-4d41-a5c0-8bc4d9583c8c"
+          />
+          <span className="m-right-10">{this.state.userInfo.email}</span>
+
+          <Button onClick={this.toggleSignIn}>Sign Out</Button>
+          <SignUpModal />
+        </Header>
+      );
+    } else {
+      UserInfo = (
+        <Header>
+          {this.state.userInfo.email}
+          <LoginModal />
+          <SignUpModal />
+        </Header>
+      );
+    }
+
     return (
       <Container>
         <div className={firstPage ? "title" : "title-s"}>
-          {/* <div className={firstPage?'title':'title'} > */}
           <h1 className="title-h1">Label Detect</h1>
         </div>
+        <div className="user-form">{UserInfo}</div>
         <Segment>
           <ImageForm onSearch={this.handleSearch} />
         </Segment>

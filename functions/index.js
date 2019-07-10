@@ -1,4 +1,4 @@
-const serviceAccount = require("C:\\firebase-keys\\logical-fabric-firebase-adminsdk-r2757-02edf22e43.json");
+// const serviceAccount = require("C:\\firebase-keys\\logical-fabric-firebase-adminsdk-r2757-02edf22e43.json");
 const _ = require("lodash");
 
 const functions = require("firebase-functions");
@@ -10,10 +10,10 @@ const bodyParser = require("body-parser");
 const vision = require("@google-cloud/vision");
 const CLIENT = new vision.ImageAnnotatorClient();
 
-// admin.initializeApp(functions.config().firebase);
-admin.initializeApp({
-  credential: admin.credential.cert(serviceAccount)
-});
+admin.initializeApp(functions.config().firebase);
+// admin.initializeApp({
+//   credential: admin.credential.cert(serviceAccount)
+// });
 
 const db = admin.firestore();
 
@@ -40,31 +40,53 @@ app.get("/images/:imageId", (req, res, next) => {
 
 // View all images
 app.get("/images", (req, res, next) => {
-  // return cors(req, res, () => {
+  console.log("idToken", req.query.idToken);
+  admin
+    .auth()
+    .verifyIdToken(req.query.idToken)
+    .then(function(decodedToken) {
+      let uid = decodedToken.uid;
 
-  // firebaseHelper.firestore.backup(db, IMAGECOLLECTION).then(data => {
-  firebaseHelper.firestore
-    .queryData(db, IMAGECOLLECTION, [], ["timestamp", "desc"])
-    .then(data => {
-      console.log("data", data);
-      // res.status(200).send(_.values(data.images));
-      res.status(200).send(_.values(data));
+      firebaseHelper.firestore
+        .queryData(db, IMAGECOLLECTION, [], ["timestamp", "desc"])
+        .then(data => {
+          console.log("data", data);
+          // res.status(200).send(_.values(data.images));
+          res.status(200).send(_.values(data));
+        });
+    })
+    .catch(function(error) {
+      // Handle error
+      console.log();
     });
+
   // })
 });
 
 app.post("/images/", (request, response, next) => {
+  console.log(request);
+  const idToken = request.body.idToken || request.query.idToken;
+  if (!idToken) {
+    response.send("Auth failed.");
+  }
+  console.log("idToken post", idToken);
+
   //todo...it has different effect on Browser and postman,
   //In Postman we use req.query.imgUrl to get params
   //In Brower we use req.body.imgUrl
-  //It is wired !!!
-  try {
-    const imageUrl = _.trim(request.body.imgUrl || request.query.imgUrl);
-    if (!imageUrl) response.send({ data: false });
-    addImageByUrl(imageUrl, response);
-  } catch (error) {
-    console.log(error);
-  }
+  //It is wired
+
+  admin
+    .auth()
+    .verifyIdToken(idToken)
+    .then(function(decodedToken) {
+      const imageUrl = _.trim(request.body.imgUrl || request.query.imgUrl);
+      if (!imageUrl) response.send({ data: false });
+      addImageByUrl(imageUrl, response);
+    })
+    .catch(function(error) {
+      console.log(error);
+    });
 });
 
 function labelDetectionAsync(imageUrl) {
@@ -101,5 +123,5 @@ async function addImageByUrl(imageUrl, response) {
 
   const newRec = await getDocById(refId.id);
 
-  response.send(newRec);
+  response.status(200).send(newRec);
 }

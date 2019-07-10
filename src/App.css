@@ -40,6 +40,11 @@
   margin-right: 10px;
 }
 
+.user-form {
+  text-align: left;
+  margin: 10px 0;
+}
+
 @keyframes move {
   0% {
     transform: translate(0, 0);
