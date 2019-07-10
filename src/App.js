@@ -26,8 +26,8 @@ import firebase from "./Config/config";
 import "firebase/functions";
 import axios from "axios";
 
-// const DOMAIN = "https://us-central1-logical-fabric.cloudfunctions.net/";
-const DOMAIN = "http://localhost:5000/logical-fabric/us-central1";
+const DOMAIN = "https://us-central1-logical-fabric.cloudfunctions.net/";
+// const DOMAIN = "http://localhost:5000/logical-fabric/us-central1";
 
 const storageRef = firebase.storage().ref();
 //firestore
@@ -69,18 +69,29 @@ class App extends Component {
             axios
               .get(DOMAIN + "/webApi/api/v1/images?idToken=" + TOKEN)
               .then(res => {
-                self.setState({
-                  BackupImages: res.data,
-                  Images: res.data,
-                  loading: false,
-                  labels: self.generateLabel(res.data),
-                  labelsBackup: self.generateLabel(res.data)
-                });
+                if (res.status == 200) {
+                  self.setState({
+                    BackupImages: res.data,
+                    Images: res.data,
+                    loading: false,
+                    labels: self.generateLabel(res.data),
+                    labelsBackup: self.generateLabel(res.data)
+                  });
+                } else {
+                  console.log("get images error");
+                }
               });
           });
       } else {
         console.log("User sign out");
-        self.setState({ userInfo: {} });
+        self.setState({
+          userInfo: {},
+          Images: [],
+          BackupImages: [],
+          category: [],
+          labels: [],
+          labelsBackup: []
+        });
       }
     });
 
@@ -148,11 +159,14 @@ class App extends Component {
         idToken: idToken
       })
       .then(res => {
-        if (!res.data) alert("Please input a new image url.");
-        let preState = self.state.Images;
-        preState.unshift(res.data);
+        if (res.status == 200) {
+          let preState = self.state.Images;
+          preState.unshift(res.data);
 
-        self.setState({ Images: preState, loading: false });
+          self.setState({ Images: preState, loading: false });
+        } else {
+          alert("Please input a new image url.");
+        }
       });
   }
 
