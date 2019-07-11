@@ -1,16 +1,16 @@
 import React from "react"
 import { Segment, Label, Icon } from "semantic-ui-react"
 export default props => (
-  <Segment>
-    <div className="ui icon input m-right-10">
+  <div>
+    {/* <div className="ui icon input m-right-10">
       <input
         className="searchInput"
         placeholder="Search"
         onChange={props.handleUserSearch}
       />
-    </div>
+    </div> */}
     {props.category.length > 0 && (
-      <span>
+      <Segment>
         {props.category.map((label, index) => {
           return (
             <Label as="a" key={index}>
@@ -21,7 +21,7 @@ export default props => (
         <Label as="a" onClick={props.handleFilterClear}>
           <Icon name="close" />
         </Label>
-      </span>
+      </Segment>
     )}
-  </Segment>
+  </div>
 )

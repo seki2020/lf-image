@@ -12,13 +12,13 @@ import firebase from "./Config/config"
 // import 'firebase/database'
 import "firebase/functions"
 import axios from "axios"
+import ImageFormConst from "./Constant/ImageFormConst.js"
 
-const DOMAIN = "https://us-central1-logical-fabric.cloudfunctions.net/"
-// const DOMAIN = "http://localhost:5000/logical-fabric/us-central1";
+// const DOMAIN = "https://us-central1-logical-fabric.cloudfunctions.net/"
+const DOMAIN = "http://localhost:5000/logical-fabric/us-central1"
 
 const storageRef = firebase.storage().ref()
 //firestore
-// import admin from 'firebase-admin'
 
 const AppTitle = props => (
   <div className={props.firstPage ? "title" : "title-s"}>
@@ -133,33 +133,48 @@ class App extends Component {
       return
     }
 
+    this.setState({ loading: true })
     const TOKEN = await firebase
       .auth()
       .currentUser.getIdToken(/* forceRefresh */ true)
 
-    this.setState({ loading: true })
-
-    if (type === "url") {
+    //Upload image file from local
+    if (type === ImageFormConst[0]) {
       this.callDetectLabelApi(keyword, this, TOKEN)
     }
-    if (type === "file") {
+
+    //Search image by label name
+    if (type === ImageFormConst[1]) {
       const userRef = storageRef.child(keyword.name)
-      const self = this
+
       const snapshot = await userRef.put(keyword)
 
       if (snapshot.state === "success") {
         try {
           const downloadURL = await snapshot.ref.getDownloadURL()
 
-          self.callDetectLabelApi(downloadURL, self, TOKEN)
+          this.callDetectLabelApi(downloadURL, this, TOKEN)
         } catch (err) {
           console.log(err)
         }
       }
     }
+
+    //Upload image url
+    if (type === ImageFormConst[2]) {
+      debugger
+      const res = await axios.get(
+        DOMAIN + "/webApi/api/v1/images?idToken=" + TOKEN + "&kw=" + keyword
+      )
+
+      const labelsList = this.generateLabel(res.data)
+      this.setState({ Images: res.data, labels: labelsList, loading: false })
+      this.labelsBackup = labelsList
+    }
   }
   callDetectLabelApi = async (imgUrl, self, idToken) => {
-    const res = axios.post(DOMAIN + "/webApi/api/v1/images", {
+    this.setState({ loading: true })
+    const res = await axios.post(DOMAIN + "/webApi/api/v1/images", {
       imgUrl: imgUrl,
       idToken: idToken
     })
@@ -171,6 +186,7 @@ class App extends Component {
     } else {
       alert("Please input a new image url.")
     }
+    self.setState({ loading: false })
   }
 
   imagePreviewFunc = imgObj => {
@@ -212,7 +228,7 @@ class App extends Component {
     })
   }
   handleUserSearch = e => {
-    const searchStr = e.target.value
+    const searchStr = e
     const labelsBackup = this.BACKUP.Labels
     if (!searchStr) {
       this.setState({ labels: [...labelsBackup] })
@@ -280,6 +296,8 @@ class App extends Component {
           userInfo={userInfo}
           onSignUpSubmit={this.onSignUpSubmit}
           toggleSignIn={this.toggleSignIn}
+          handleUserSearch={this.handleUserSearch}
+          handleFilterClear={this.handleFilterClear}
         />
         {userInfo.email && (
           <div>

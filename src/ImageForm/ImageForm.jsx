@@ -2,28 +2,36 @@ import React, { Component } from "react"
 import { Dropdown, Segment, Grid } from "semantic-ui-react"
 import _ from "lodash"
 import "./ImageForm.css"
+import methodOptions from "../Constant/ImageFormConst"
 
-const methodOptions = [
-  {
-    key: "Url",
-    text: "Url",
-    value: "Url"
-  },
-  {
-    key: "File",
-    text: "File",
-    value: "File"
-  }
-]
+// const methodOptions = [
+//   {
+//     key: "Url",
+//     text: "Url",
+//     value: "Url"
+//   },
+//   {
+//     key: "File",
+//     text: "File",
+//     value: "File"
+//   },
+//   {
+//     key: "Query",
+//     text: "Query",
+//     value: "Query"
+//   }
+// ]
 
-const MODE = {
-  input: "Url",
-  search: "File"
-}
-const INPUTTYPE = {
-  File: "file",
-  Input: "text"
-}
+// const MODE = {
+//   input: "Url",
+//   file: "File",
+//   query: "Query"
+// }
+// const INPUTTYPE = {
+//   File: "file",
+//   Input: "text",
+//   Query: "text"
+// }
 
 class ImageForm extends Component {
   constructor(props) {
@@ -32,14 +40,14 @@ class ImageForm extends Component {
     this.pressSearch = this.pressSearch.bind(this)
     this.handleUserInput = this.handleUserInput.bind(this)
     this.handleModeChange = this.handleModeChange.bind(this)
+    this.onEnterPress = this.onEnterPress.bind(this)
+  }
 
-    this.state = {
-      modeVal: MODE.search
-    }
+  state = {
+    modeVal: methodOptions[0]
   }
 
   handleUserInput(e) {
-    debugger
     if (e.target.type === "text") {
       this.setState({
         queryUrl: e.target.value
@@ -53,19 +61,22 @@ class ImageForm extends Component {
   }
 
   pressSearch() {
-    if (this.state.modeVal === MODE.input) {
-      this.props.onSearch(this.state.queryUrl, "url")
-    } else {
-      this.props.onSearch(this.state.queryUrl, "file")
-    }
+    this.props.onSearch(this.state.queryUrl, this.state.modeVal)
   }
   handleModeChange(e, option) {
+    debugger
     this.setState({
-      modeVal: option.value
+      modeVal: option.options.filter(doc => doc.key === option.value)[0]
     })
+  }
+  onEnterPress(e) {
+    if (e.key === "Enter") {
+      this.pressSearch()
+    }
   }
 
   render() {
+    const onSubmit = _.throttle(this.pressSearch, 2000, { trailing: false })
     return (
       <Segment>
         <Grid textAlign="center" divided stackable columns={3}>
@@ -74,28 +85,27 @@ class ImageForm extends Component {
               placeholder="Select Friend"
               selection
               fluid
-              value={this.state.modeVal}
+              value={this.state.modeVal.value}
               onChange={this.handleModeChange}
               options={methodOptions}
             />
+            {/* onChange={(e,option)=>{this.setState({modeVal: option});console.log(option)}} */}
           </Grid.Column>
           <Grid.Column stretched mobile="10">
             <div className="ui fluid icon input">
               <input
-                type={INPUTTYPE[this.state.modeVal]}
                 className="searchInput"
+                type={this.state.modeVal.input}
                 placeholder=""
+                onKeyPress={this.onEnterPress}
                 onChange={this.handleUserInput}
               />
             </div>
           </Grid.Column>
           <Grid.Column stretched mobile="3">
-            <button
-              className="ui button"
-              onClick={_.throttle(this.pressSearch, 2000, { trailing: false })}
-            >
+            <button className="ui button" onClick={onSubmit}>
               <i aria-hidden="true" className="search icon"></i>
-              {this.state.modeVal}
+              {this.state.modeVal.text}
             </button>
           </Grid.Column>
         </Grid>
