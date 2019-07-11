@@ -1,8 +1,8 @@
-import React, { Component } from "react"
-import { Dropdown, Segment, Grid } from "semantic-ui-react"
-import _ from "lodash"
-import "./ImageForm.css"
-import methodOptions from "../Constant/ImageFormConst"
+import React, { Component } from "react";
+import { Dropdown, Segment, Grid } from "semantic-ui-react";
+import _ from "lodash";
+import "./ImageForm.css";
+import methodOptions from "../Constant/ImageFormConst";
 
 // const methodOptions = [
 //   {
@@ -35,48 +35,48 @@ import methodOptions from "../Constant/ImageFormConst"
 
 class ImageForm extends Component {
   constructor(props) {
-    super(props)
-    this.onSearch = props.onSearch.bind(this)
-    this.pressSearch = this.pressSearch.bind(this)
-    this.handleUserInput = this.handleUserInput.bind(this)
-    this.handleModeChange = this.handleModeChange.bind(this)
-    this.onEnterPress = this.onEnterPress.bind(this)
+    super(props);
+    this.onSearch = props.onSearch.bind(this);
+    this.pressSearch = this.pressSearch.bind(this);
+    this.handleUserInput = this.handleUserInput.bind(this);
+    this.handleModeChange = this.handleModeChange.bind(this);
+    this.onEnterPress = this.onEnterPress.bind(this);
   }
 
   state = {
     modeVal: methodOptions[0]
-  }
+  };
 
   handleUserInput(e) {
     if (e.target.type === "text") {
       this.setState({
         queryUrl: e.target.value
-      })
+      });
     }
     if (e.target.type === "file") {
       this.setState({
         queryUrl: e.target.files[0]
-      })
+      });
     }
   }
 
   pressSearch() {
-    this.props.onSearch(this.state.queryUrl, this.state.modeVal)
+    this.props.onSearch(this.state.queryUrl, this.state.modeVal);
   }
   handleModeChange(e, option) {
-    debugger
+    debugger;
     this.setState({
       modeVal: option.options.filter(doc => doc.key === option.value)[0]
-    })
+    });
   }
   onEnterPress(e) {
     if (e.key === "Enter") {
-      this.pressSearch()
+      this.pressSearch();
     }
   }
 
   render() {
-    const onSubmit = _.throttle(this.pressSearch, 2000, { trailing: false })
+    const onSubmit = _.throttle(this.pressSearch, 2000, { trailing: false });
     return (
       <Segment>
         <Grid textAlign="center" divided stackable columns={3}>
@@ -110,8 +110,8 @@ class ImageForm extends Component {
           </Grid.Column>
         </Grid>
       </Segment>
-    )
+    );
   }
 }
 
-export default ImageForm
+export default ImageForm;

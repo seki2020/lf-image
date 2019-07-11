@@ -1,6 +1,6 @@
-import React, { Component } from "react"
-import { Table, Segment } from "semantic-ui-react"
-import ImageItem from "../ImageItem/ImageItem"
+import React, { Component } from "react";
+import { Table, Segment } from "semantic-ui-react";
+import ImageItem from "../ImageItem/ImageItem";
 
 export default class ImageList extends Component {
   render() {
@@ -27,11 +27,11 @@ export default class ImageList extends Component {
                   key={index}
                   onPreview={this.props.onPreview}
                 />
-              )
+              );
             })}
           </Table.Body>
         </Table>
       </Segment>
-    )
+    );
   }
 }

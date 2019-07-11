@@ -17,6 +17,6 @@ const ImageFormConst = [
     value: "Query",
     input: "text"
   }
-]
+];
 
-export default ImageFormConst
+export default ImageFormConst;

@@ -1,8 +1,8 @@
-import React from "react"
+import React from "react";
 
-import { Header, Image, Button, Divider } from "semantic-ui-react"
-import LoginModal from "../Model/LoginModal"
-import SignUpModal from "../Model/SignUpModal"
+import { Header, Image, Button, Divider } from "semantic-ui-react";
+import LoginModal from "../Model/LoginModal";
+import SignUpModal from "../Model/SignUpModal";
 export default props => (
   <div className="user-form">
     {props.userInfo.email ? (
@@ -25,4 +25,4 @@ export default props => (
       </Header>
     )}
   </div>
-)
+);

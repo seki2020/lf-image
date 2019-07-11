@@ -1,19 +1,19 @@
-import React, { Component } from "react"
-import { Table, Image, List } from "semantic-ui-react"
-import moment from "moment"
-import "./ImageItem.css"
+import React, { Component } from "react";
+import { Table, Image, List } from "semantic-ui-react";
+import moment from "moment";
+import "./ImageItem.css";
 
 class ImageItem extends Component {
   constructor(props) {
-    super(props)
-    this.clickImage = this.clickImage.bind(this)
+    super(props);
+    this.clickImage = this.clickImage.bind(this);
   }
 
   clickImage() {
-    this.props.onPreview(this.props.image)
+    this.props.onPreview(this.props.image);
   }
   render() {
-    const apiResult = this.props.image.apiResult
+    const apiResult = this.props.image.apiResult;
     return (
       <Table.Row>
         <Table.Cell>
@@ -31,7 +31,7 @@ class ImageItem extends Component {
                 <p className="description">{item.description}</p>
                 <p>{Math.round(item.score * 10000) / 100 + "%"}</p>
               </Table.Cell>
-            )
+            );
           }
         })}
         <Table.Cell>
@@ -40,8 +40,8 @@ class ImageItem extends Component {
           </p>
         </Table.Cell>
       </Table.Row>
-    )
+    );
   }
 }
 
-export default ImageItem
+export default ImageItem;

@@ -1,10 +1,10 @@
-import React, { Component } from "react"
+import React, { Component } from "react";
 
-import { Modal, Form, Button, Divider } from "semantic-ui-react"
+import { Modal, Form, Button, Divider } from "semantic-ui-react";
 export default class LoginModal extends Component {
-  state = { modalOpen: false }
-  handleOpen = () => this.setState({ modalOpen: true })
-  handleClose = () => this.setState({ modalOpen: false })
+  state = { modalOpen: false };
+  handleOpen = () => this.setState({ modalOpen: true });
+  handleClose = () => this.setState({ modalOpen: false });
 
   render() {
     return (
@@ -42,7 +42,7 @@ export default class LoginModal extends Component {
           </Form>
         </Modal.Content>
       </Modal>
-    )
+    );
   }
 }
 

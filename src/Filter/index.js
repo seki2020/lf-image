@@ -1,5 +1,5 @@
-import React from "react"
-import { Segment, Label, Icon } from "semantic-ui-react"
+import React from "react";
+import { Segment, Label, Icon } from "semantic-ui-react";
 export default props => (
   <div>
     {/* <div className="ui icon input m-right-10">
@@ -16,7 +16,7 @@ export default props => (
             <Label as="a" key={index}>
               {label}
             </Label>
-          )
+          );
         })}
         <Label as="a" onClick={props.handleFilterClear}>
           <Icon name="close" />
@@ -24,4 +24,4 @@ export default props => (
       </Segment>
     )}
   </div>
-)
+);
