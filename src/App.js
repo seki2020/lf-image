@@ -41,20 +41,7 @@ const LabelsComp = props => (
 class App extends Component {
   constructor(props) {
     super(props)
-    this.state = {
-      queryString: "",
-      Images: [],
-      BackupImages: [],
-      currentImg: { imgUrl: "", apiResult: [] },
-      modal: false,
-      uploadImage: {},
-      loading: false,
-      firstPage: true,
-      labels: [],
-      labelsBackup: [],
-      category: [],
-      userInfo: {}
-    }
+
     const self = this
 
     setTimeout(() => {
@@ -107,6 +94,24 @@ class App extends Component {
     this.handleFilterRemove = this.handleFilterRemove.bind(this)
     this.handleUserSearch = this.handleUserSearch.bind(this)
     this.onSignUpSubmit = this.onSignUpSubmit.bind(this)
+  }
+
+  Backup = {
+    Images: [],
+    Labels: []
+  }
+
+  state = {
+    Images: [],
+    BackupImages: [],
+    currentImg: { imgUrl: "", apiResult: [] },
+    modal: false,
+    loading: false,
+    firstPage: true,
+    labels: [],
+    labelsBackup: [],
+    category: [],
+    userInfo: {}
   }
 
   generateLabel = images => {
@@ -278,19 +283,30 @@ class App extends Component {
           onSignUpSubmit={this.onSignUpSubmit}
           toggleSignIn={this.toggleSignIn}
         />
-        <ImageForm onSearch={this.handleSearch} />
-        <Filter
-          category={category}
-          handleUserSearch={this.handleUserSearch}
-          handleFilterClear={this.handleFilterClear}
-        />
-        <LabelsComp labels={labels} handleLabelClick={this.handleLabelClick} />
-        <ImageList list={this.state.Images} onPreview={this.imagePreviewFunc} />
-        <ImagePreview
-          imagePreview={this.state.currentImg}
-          open={this.state.modal}
-          modelClose={this.toggleModal}
-        />
+        {userInfo.email && (
+          <div>
+            <ImageForm onSearch={this.handleSearch} />
+            <Filter
+              category={category}
+              handleUserSearch={this.handleUserSearch}
+              handleFilterClear={this.handleFilterClear}
+            />
+            <LabelsComp
+              labels={labels}
+              handleLabelClick={this.handleLabelClick}
+            />
+            <ImageList
+              list={this.state.Images}
+              onPreview={this.imagePreviewFunc}
+            />
+            <ImagePreview
+              imagePreview={this.state.currentImg}
+              open={this.state.modal}
+              modelClose={this.toggleModal}
+            />
+          </div>
+        )}
+
         <Dimmer active={this.state.loading} inverted>
           <Loader size="large">Loading</Loader>
         </Dimmer>
