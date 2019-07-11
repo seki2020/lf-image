@@ -63,25 +63,25 @@ class App extends Component {
         )
 
         if (res.status == 200) {
+          const labelValue = self.generateLabel(res.data)
+          this.BACKUP.Images = res.data
+          this.BACKUP.Labels = labelValue
           self.setState({
-            BackupImages: res.data,
             Images: res.data,
             loading: false,
-            labels: self.generateLabel(res.data),
-            labelsBackup: self.generateLabel(res.data)
+            labels: labelValue
           })
         } else {
           console.log("get images error")
         }
       } else {
         console.log("User sign out")
+        this.BACKUP = {}
         self.setState({
           userInfo: {},
           Images: [],
-          BackupImages: [],
           category: [],
-          labels: [],
-          labelsBackup: []
+          labels: []
         })
       }
     })
@@ -96,20 +96,18 @@ class App extends Component {
     this.onSignUpSubmit = this.onSignUpSubmit.bind(this)
   }
 
-  Backup = {
+  BACKUP = {
     Images: [],
     Labels: []
   }
 
   state = {
     Images: [],
-    BackupImages: [],
     currentImg: { imgUrl: "", apiResult: [] },
     modal: false,
     loading: false,
     firstPage: true,
     labels: [],
-    labelsBackup: [],
     category: [],
     userInfo: {}
   }
@@ -204,7 +202,7 @@ class App extends Component {
     })
   }
   handleFilterClear = () => {
-    this.setState({ Images: this.state.BackupImages, category: [] })
+    this.setState({ Images: this.BACKUP.Images, category: [] })
   }
   handleFilterRemove = e => {
     this.setState({
@@ -215,7 +213,7 @@ class App extends Component {
   }
   handleUserSearch = e => {
     const searchStr = e.target.value
-    const { labelsBackup } = this.state
+    const labelsBackup = this.BACKUP.Labels
     if (!searchStr) {
       this.setState({ labels: [...labelsBackup] })
     }
