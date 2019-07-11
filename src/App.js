@@ -14,8 +14,8 @@ import "firebase/functions";
 import axios from "axios";
 import ImageFormConst from "./Constant/ImageFormConst.js";
 
-// const DOMAIN = "https://us-central1-logical-fabric.cloudfunctions.net/"
-const DOMAIN = "http://localhost:5000/logical-fabric/us-central1";
+const DOMAIN = "https://us-central1-logical-fabric.cloudfunctions.net/";
+// const DOMAIN = "http://localhost:5000/logical-fabric/us-central1";
 
 const storageRef = firebase.storage().ref();
 //firestore
