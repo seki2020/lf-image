@@ -14,7 +14,7 @@ import "firebase/functions";
 import axios from "axios";
 import ImageFormConst from "./Constant/ImageFormConst.js";
 
-const DOMAIN = "https://us-central1-logical-fabric.cloudfunctions.net/";
+// const DOMAIN = "https://us-central1-logical-fabric.cloudfunctions.net/";
 // const DOMAIN = "http://localhost:5000/logical-fabric/us-central1";
 
 const storageRef = firebase.storage().ref();
@@ -59,7 +59,9 @@ class App extends Component {
           .currentUser.getIdToken(/* forceRefresh */ true);
 
         const res = await axios.get(
-          DOMAIN + "/webApi/api/v1/images?idToken=" + TOKEN
+          process.env.REACT_APP_DOMAIN +
+            "/webApi/api/v1/images?idToken=" +
+            TOKEN
         );
 
         if (res.status == 200) {
@@ -164,7 +166,11 @@ class App extends Component {
     if (type === ImageFormConst[2]) {
       debugger;
       const res = await axios.get(
-        DOMAIN + "/webApi/api/v1/images?idToken=" + TOKEN + "&kw=" + keyword
+        process.env.REACT_APP_DOMAIN +
+          "/webApi/api/v1/images?idToken=" +
+          TOKEN +
+          "&kw=" +
+          keyword
       );
 
       const labelsList = this.generateLabel(res.data);
@@ -174,10 +180,13 @@ class App extends Component {
   };
   callDetectLabelApi = async (imgUrl, self, idToken) => {
     this.setState({ loading: true });
-    const res = await axios.post(DOMAIN + "/webApi/api/v1/images", {
-      imgUrl: imgUrl,
-      idToken: idToken
-    });
+    const res = await axios.post(
+      process.env.REACT_APP_DOMAIN + "/webApi/api/v1/images",
+      {
+        imgUrl: imgUrl,
+        idToken: idToken
+      }
+    );
     if (res.status == 200) {
       let preState = self.state.Images;
       preState.unshift(res.data);
@@ -291,7 +300,7 @@ class App extends Component {
 
     return (
       <Container>
-        <AppTitle title="Detect Image Label" firstPage={firstPage} />
+        <AppTitle title={process.env.REACT_APP_TITLE} firstPage={firstPage} />
         <UserForm
           userInfo={userInfo}
           onSignUpSubmit={this.onSignUpSubmit}
