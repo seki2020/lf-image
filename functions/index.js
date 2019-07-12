@@ -1,4 +1,5 @@
 const serviceAccount = require("C:\\firebase-keys\\logical-fabric-firebase-adminsdk-r2757-02edf22e43.json");
+//cmd set GOOGLE_APPLICATION_CREDENTIALS=C:\firebase-keys\Logical-Fabric-4237a58a0acb.json
 const _ = require("lodash");
 
 const functions = require("firebase-functions");
@@ -32,19 +33,20 @@ const IMAGECOLLECTION = "images";
 
 exports.webApi = functions.https.onRequest(main);
 
-app.get("/images/:imageId", (req, res, next) => {
-  firebaseHelper.firestore
-    .getDocument(db, IMAGECOLLECTION, req.params.imageId)
-    .then(doc => res.status(200).send(doc));
-});
+// app.get("/images/:imageId", (req, res, next) => {
+//   firebaseHelper.firestore
+//     .getDocument(db, IMAGECOLLECTION, req.params.imageId)
+//     .then(doc => res.status(200).send(doc));
+// });
 
-// View all images
+// View all images or with keyword
 app.get("/images", async (req, res, next) => {
   try {
     const { idToken, kw } = req.query;
 
     const decodedToken = await admin.auth().verifyIdToken(req.query.idToken);
     let uid = decodedToken.uid;
+    if (!uid) res.send("Auth failed");
 
     const snapshot = await firebaseHelper.firestore.queryData(
       db,
@@ -67,7 +69,7 @@ app.get("/images", async (req, res, next) => {
       });
     }
 
-    console.log("data", data);
+    console.log("data with keyword", data);
     res.status(200).send(data);
   } catch (err) {
     res.send(err);
@@ -107,6 +109,7 @@ app.post("/images/", async (request, response, next) => {
     );
 
     //return newly created record to client
+    //todo...propect to move it away
     const newRec = await firebaseHelper.firestore.getDocument(
       db,
       IMAGECOLLECTION,
@@ -118,48 +121,3 @@ app.post("/images/", async (request, response, next) => {
     response.send(err);
   }
 });
-
-// function labelDetectionAsync(imageUrl) {
-//   return new Promise(resolve => {
-//     resolve(CLIENT.labelDetection(imageUrl));
-//   });
-// }
-
-// function saveResultAsync(json) {
-//   return new Promise(resolve => {
-//     resolve(
-//       firebaseHelper.firestore.createNewDocument(db, IMAGECOLLECTION, json)
-//     );
-//   });
-// }
-// function getDocById(id) {
-//   return new Promise(resolve => {
-//     resolve(firebaseHelper.firestore.getDocument(db, IMAGECOLLECTION, id));
-//   });
-// }
-
-// async function addImageByUrl(imageUrl, response) {
-//   const labels = await CLIENT.labelDetection(imageUrl);
-//   const annotations = labels[0].labelAnnotations;
-//   console.log("labels", annotations);
-
-//   const record = {
-//     imgUrl: imageUrl,
-//     timestamp: _.now(),
-//     apiResult: annotations
-//   };
-//   const refId = await firebaseHelper.firestore.createNewDocument(
-//     db,
-//     IMAGECOLLECTION,
-//     record
-//   );
-//   console.log("refId", refId.id);
-
-//   const newRec = await firebaseHelper.firestore.getDocument(
-//     db,
-//     IMAGECOLLECTION,
-//     refId.id
-//   );
-
-//   return newRec;
-// }
