@@ -1,4 +1,4 @@
-// const serviceAccount = require("C:\\firebase-keys\\logical-fabric-firebase-adminsdk-r2757-02edf22e43.json");
+const serviceAccount = require("C:\\firebase-keys\\logical-fabric-firebase-adminsdk-r2757-02edf22e43.json");
 const _ = require("lodash");
 
 const functions = require("firebase-functions");
@@ -8,12 +8,12 @@ const express = require("express");
 const bodyParser = require("body-parser");
 
 const vision = require("@google-cloud/vision");
-const CLIENT = new vision.ImageAnnotatorClient();
+const client = new vision.ImageAnnotatorClient();
 
-admin.initializeApp(functions.config().firebase);
-// admin.initializeApp({
-//   credential: admin.credential.cert(serviceAccount)
-// });
+// admin.initializeApp(functions.config().firebase);
+admin.initializeApp({
+  credential: admin.credential.cert(serviceAccount)
+});
 
 const db = admin.firestore();
 
@@ -75,12 +75,13 @@ app.get("/images", async (req, res, next) => {
 });
 
 app.post("/images/", async (request, response, next) => {
-  console.log(request);
+  //Inbound query string
+  const imageUrl = _.trim(request.body.imgUrl || request.query.imgUrl);
   const idToken = request.body.idToken || request.query.idToken;
-  if (!idToken) {
-    response.send("Auth failed.");
-  }
-  console.log("idToken post", idToken);
+  console.log("image to add", imageUrl);
+
+  if (!imageUrl) response.send("Image Url empty.");
+  if (!idToken) response.send("Auth failed.");
 
   //todo...it has different effect on Browser and postman,
   //In Postman we use req.query.imgUrl to get params
@@ -88,12 +89,31 @@ app.post("/images/", async (request, response, next) => {
   //It is wired
 
   try {
+    // ckeck session validation
     await admin.auth().verifyIdToken(idToken);
 
-    const imageUrl = _.trim(request.body.imgUrl || request.query.imgUrl);
-    if (!imageUrl) response.send({ data: false });
-    const newRecord = await addImageByUrl(imageUrl, response);
-    response.status(200).send(newRecord);
+    // get image url by Google Vision API
+    const labels = await client.labelDetection(imageUrl);
+
+    //Save a new record to Firestore
+    const refId = await firebaseHelper.firestore.createNewDocument(
+      db,
+      IMAGECOLLECTION,
+      {
+        imgUrl: imageUrl,
+        timestamp: _.now(),
+        apiResult: labels[0].labelAnnotations
+      }
+    );
+
+    //return newly created record to client
+    const newRec = await firebaseHelper.firestore.getDocument(
+      db,
+      IMAGECOLLECTION,
+      refId.id
+    );
+
+    response.status(200).send(newRec);
   } catch (err) {
     response.send(err);
   }
@@ -118,28 +138,28 @@ app.post("/images/", async (request, response, next) => {
 //   });
 // }
 
-async function addImageByUrl(imageUrl, response) {
-  const labels = await CLIENT.labelDetection(imageUrl);
-  const annotations = labels[0].labelAnnotations;
-  console.log("labels", annotations);
+// async function addImageByUrl(imageUrl, response) {
+//   const labels = await CLIENT.labelDetection(imageUrl);
+//   const annotations = labels[0].labelAnnotations;
+//   console.log("labels", annotations);
 
-  const record = {
-    imgUrl: imageUrl,
-    timestamp: _.now(),
-    apiResult: annotations
-  };
-  const refId = await firebaseHelper.firestore.createNewDocument(
-    db,
-    IMAGECOLLECTION,
-    record
-  );
-  console.log("refId", refId.id);
+//   const record = {
+//     imgUrl: imageUrl,
+//     timestamp: _.now(),
+//     apiResult: annotations
+//   };
+//   const refId = await firebaseHelper.firestore.createNewDocument(
+//     db,
+//     IMAGECOLLECTION,
+//     record
+//   );
+//   console.log("refId", refId.id);
 
-  const newRec = await firebaseHelper.firestore.getDocument(
-    db,
-    IMAGECOLLECTION,
-    refId.id
-  );
+//   const newRec = await firebaseHelper.firestore.getDocument(
+//     db,
+//     IMAGECOLLECTION,
+//     refId.id
+//   );
 
-  return newRec;
-}
+//   return newRec;
+// }
