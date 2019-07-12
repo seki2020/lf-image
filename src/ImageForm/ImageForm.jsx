@@ -4,35 +4,6 @@ import _ from "lodash";
 import "./ImageForm.css";
 import methodOptions from "../Constant/ImageFormConst";
 
-// const methodOptions = [
-//   {
-//     key: "Url",
-//     text: "Url",
-//     value: "Url"
-//   },
-//   {
-//     key: "File",
-//     text: "File",
-//     value: "File"
-//   },
-//   {
-//     key: "Query",
-//     text: "Query",
-//     value: "Query"
-//   }
-// ]
-
-// const MODE = {
-//   input: "Url",
-//   file: "File",
-//   query: "Query"
-// }
-// const INPUTTYPE = {
-//   File: "file",
-//   Input: "text",
-//   Query: "text"
-// }
-
 class ImageForm extends Component {
   constructor(props) {
     super(props);
@@ -94,6 +65,7 @@ class ImageForm extends Component {
           <Grid.Column stretched mobile="10">
             <div className="ui fluid icon input">
               <input
+                id="searchInput"
                 className="searchInput"
                 type={this.state.modeVal.input}
                 placeholder=""
@@ -103,7 +75,11 @@ class ImageForm extends Component {
             </div>
           </Grid.Column>
           <Grid.Column stretched mobile="3">
-            <button className="ui button" onClick={onSubmit}>
+            <button
+              className="ui button"
+              id="searchInputSubmit"
+              onClick={onSubmit}
+            >
               <i aria-hidden="true" className="search icon"></i>
               {this.state.modeVal.text}
             </button>
