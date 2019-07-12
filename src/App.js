@@ -40,9 +40,9 @@ class App extends Component {
 
     const self = this;
 
-    setTimeout(() => {
-      self.setState({ firstPage: false });
-    }, 3000);
+    // setTimeout(() => {
+    //   self.setState({ firstPage: false });
+    // }, 3000);
 
     firebase.auth().onAuthStateChanged(async user => {
       if (user) {
@@ -105,7 +105,7 @@ class App extends Component {
     currentImg: { imgUrl: "", apiResult: [] },
     modal: false,
     loading: false,
-    firstPage: true,
+    firstPage: false,
     labels: [],
     category: [],
     userInfo: {}

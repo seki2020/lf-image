@@ -33,7 +33,7 @@
 .title-h1 {
   font-family: "gibsonlight";
   text-transform: uppercase;
-  animation: move 3s ease alternate;
+  /* animation: move 3s ease alternate; */
 }
 
 .m-right-10 {
