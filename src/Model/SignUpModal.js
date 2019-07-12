@@ -9,7 +9,11 @@ export default class LoginModal extends Component {
   render() {
     return (
       <Modal
-        trigger={<Button onClick={this.handleOpen}>Sign Up</Button>}
+        trigger={
+          <Button onClick={this.handleOpen} id="signup-btn">
+            Sign Up
+          </Button>
+        }
         open={this.state.modalOpen}
         onClose={this.handleClose}
       >

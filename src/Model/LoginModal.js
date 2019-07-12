@@ -9,7 +9,12 @@ export default class LoginModal extends Component {
   render() {
     return (
       <Modal
-        trigger={<Button onClick={this.handleOpen}>Login</Button>}
+        id="login-modal"
+        trigger={
+          <Button onClick={this.handleOpen} id="login-btn">
+            Login
+          </Button>
+        }
         open={this.state.modalOpen}
         onClose={this.handleClose}
       >
@@ -32,7 +37,11 @@ export default class LoginModal extends Component {
                 placeholder=""
               />
             </Form.Group>
-            <Button type="submit" onClick={this.props.toggleSignIn}>
+            <Button
+              type="submit"
+              id="toggle-login"
+              onClick={this.props.toggleSignIn}
+            >
               Submit
             </Button>
             <Button type="reset" onClick={this.handleClose}>

@@ -15,11 +15,11 @@ class ImageItem extends Component {
   render() {
     const apiResult = this.props.image.apiResult;
     return (
-      <Table.Row>
+      <Table.Row className="image-item">
         <Table.Cell>
           <Image
             src={this.props.image.imgUrl}
-            className="responsive-image"
+            className="responsive-image img-item"
             onClick={this.clickImage}
             verticalAlign="middle"
           />

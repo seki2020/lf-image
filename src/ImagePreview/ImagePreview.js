@@ -32,6 +32,9 @@ class ImagePreview extends Component {
           </Modal.Description>
         </Modal.Content>
         <Modal.Actions>
+          <Button color="red" onClick={this.props.deleteImage} inverted>
+            <Icon name="checkmark" /> Delete
+          </Button>
           <Button color="green" onClick={this.props.modelClose} inverted>
             <Icon name="checkmark" /> Close
           </Button>

@@ -10,12 +10,8 @@ import Filter from "./Filter";
 
 import firebase from "./Config/config";
 // import 'firebase/database'
-import "firebase/functions";
 import axios from "axios";
 import ImageFormConst from "./Constant/ImageFormConst.js";
-
-const DOMAIN = "https://us-central1-logical-fabric.cloudfunctions.net/";
-// const DOMAIN = "http://localhost:5000/logical-fabric/us-central1";
 
 const storageRef = firebase.storage().ref();
 //firestore
@@ -44,9 +40,9 @@ class App extends Component {
 
     const self = this;
 
-    setTimeout(() => {
-      self.setState({ firstPage: false });
-    }, 3000);
+    // setTimeout(() => {
+    //   self.setState({ firstPage: false });
+    // }, 3000);
 
     firebase.auth().onAuthStateChanged(async user => {
       if (user) {
@@ -59,7 +55,9 @@ class App extends Component {
           .currentUser.getIdToken(/* forceRefresh */ true);
 
         const res = await axios.get(
-          DOMAIN + "/webApi/api/v1/images?idToken=" + TOKEN
+          process.env.REACT_APP_DOMAIN +
+            "/webApi/api/v1/images?idToken=" +
+            TOKEN
         );
 
         if (res.status == 200) {
@@ -94,6 +92,7 @@ class App extends Component {
     this.handleFilterRemove = this.handleFilterRemove.bind(this);
     this.handleUserSearch = this.handleUserSearch.bind(this);
     this.onSignUpSubmit = this.onSignUpSubmit.bind(this);
+    this.deleteImage = this.deleteImage.bind(this);
   }
 
   BACKUP = {
@@ -106,7 +105,7 @@ class App extends Component {
     currentImg: { imgUrl: "", apiResult: [] },
     modal: false,
     loading: false,
-    firstPage: true,
+    firstPage: false,
     labels: [],
     category: [],
     userInfo: {}
@@ -164,7 +163,11 @@ class App extends Component {
     if (type === ImageFormConst[2]) {
       debugger;
       const res = await axios.get(
-        DOMAIN + "/webApi/api/v1/images?idToken=" + TOKEN + "&kw=" + keyword
+        process.env.REACT_APP_DOMAIN +
+          "/webApi/api/v1/images?idToken=" +
+          TOKEN +
+          "&kw=" +
+          keyword
       );
 
       const labelsList = this.generateLabel(res.data);
@@ -174,10 +177,13 @@ class App extends Component {
   };
   callDetectLabelApi = async (imgUrl, self, idToken) => {
     this.setState({ loading: true });
-    const res = await axios.post(DOMAIN + "/webApi/api/v1/images", {
-      imgUrl: imgUrl,
-      idToken: idToken
-    });
+    const res = await axios.post(
+      process.env.REACT_APP_DOMAIN + "/webApi/api/v1/images",
+      {
+        imgUrl: imgUrl,
+        idToken: idToken
+      }
+    );
     if (res.status == 200) {
       let preState = self.state.Images;
       preState.unshift(res.data);
@@ -255,8 +261,8 @@ class App extends Component {
       .createUserWithEmailAndPassword(username, psd)
       .catch(function(error) {
         // Handle Errors here.
-        var errorCode = error.code;
-        var errorMessage = error.message;
+        // var errorCode = error.code;
+        // var errorMessage = error.message;
         alert(error.message);
         // ...
       });
@@ -285,13 +291,39 @@ class App extends Component {
         });
     }
   };
+  deleteImage = async imageId => {
+    const id = this.state.currentImg.Id;
+    if (!firebase.auth().currentUser) {
+      alert("Please Login and try again.");
+      return;
+    }
+
+    this.setState({ loading: true });
+    const TOKEN = await firebase
+      .auth()
+      .currentUser.getIdToken(/* forceRefresh */ true);
+
+    const { data } = await axios.delete(
+      process.env.REACT_APP_DOMAIN +
+        "/webApi/api/v1/image?idToken=" +
+        TOKEN +
+        "&imageId=" +
+        id
+    );
+
+    this.setState({ loading: false });
+    alert(data.message);
+    if (data.status) {
+      window.location.reload();
+    }
+  };
 
   render() {
     const { firstPage, labels, userInfo, category } = this.state;
 
     return (
       <Container>
-        <AppTitle title="Detect Image Label" firstPage={firstPage} />
+        <AppTitle title={process.env.REACT_APP_TITLE} firstPage={firstPage} />
         <UserForm
           userInfo={userInfo}
           onSignUpSubmit={this.onSignUpSubmit}
@@ -319,6 +351,7 @@ class App extends Component {
               imagePreview={this.state.currentImg}
               open={this.state.modal}
               modelClose={this.toggleModal}
+              deleteImage={this.deleteImage}
             />
           </div>
         )}
