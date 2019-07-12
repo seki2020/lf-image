@@ -56,6 +56,10 @@ app.get("/images", async (req, res, next) => {
     );
 
     let data = _.values(snapshot);
+    let dataIds = _.keys(snapshot);
+    data.map((doc, index) => {
+      return (doc.Id = dataIds[index]);
+    });
 
     //Search by keyword
     if (kw) {
@@ -117,6 +121,31 @@ app.post("/images/", async (request, response, next) => {
     );
 
     response.status(200).send(newRec);
+  } catch (err) {
+    response.send(err);
+  }
+});
+
+app.delete("/image/", async (request, response, next) => {
+  //Inbound query string
+  const imageId = _.trim(request.body.imageId || request.query.imageId);
+  const idToken = request.body.idToken || request.query.idToken;
+  console.log("image to remove", imageId);
+
+  if (!imageId) response.send("Image Id empty.");
+  if (!idToken) response.send("Auth failed.");
+
+  try {
+    // ckeck session validation
+    await admin.auth().verifyIdToken(idToken);
+
+    const res = await firebaseHelper.firestore.deleteDocument(
+      db,
+      IMAGECOLLECTION,
+      imageId
+    );
+    console.log("delete result", res);
+    response.status(200).send(res);
   } catch (err) {
     response.send(err);
   }

@@ -10,12 +10,8 @@ import Filter from "./Filter";
 
 import firebase from "./Config/config";
 // import 'firebase/database'
-import "firebase/functions";
 import axios from "axios";
 import ImageFormConst from "./Constant/ImageFormConst.js";
-
-// const DOMAIN = "https://us-central1-logical-fabric.cloudfunctions.net/";
-// const DOMAIN = "http://localhost:5000/logical-fabric/us-central1";
 
 const storageRef = firebase.storage().ref();
 //firestore
@@ -96,6 +92,7 @@ class App extends Component {
     this.handleFilterRemove = this.handleFilterRemove.bind(this);
     this.handleUserSearch = this.handleUserSearch.bind(this);
     this.onSignUpSubmit = this.onSignUpSubmit.bind(this);
+    this.deleteImage = this.deleteImage.bind(this);
   }
 
   BACKUP = {
@@ -264,8 +261,8 @@ class App extends Component {
       .createUserWithEmailAndPassword(username, psd)
       .catch(function(error) {
         // Handle Errors here.
-        var errorCode = error.code;
-        var errorMessage = error.message;
+        // var errorCode = error.code;
+        // var errorMessage = error.message;
         alert(error.message);
         // ...
       });
@@ -292,6 +289,32 @@ class App extends Component {
             alert(errorMessage);
           }
         });
+    }
+  };
+  deleteImage = async imageId => {
+    const id = this.state.currentImg.Id;
+    if (!firebase.auth().currentUser) {
+      alert("Please Login and try again.");
+      return;
+    }
+
+    this.setState({ loading: true });
+    const TOKEN = await firebase
+      .auth()
+      .currentUser.getIdToken(/* forceRefresh */ true);
+
+    const { data } = await axios.delete(
+      process.env.REACT_APP_DOMAIN +
+        "/webApi/api/v1/image?idToken=" +
+        TOKEN +
+        "&imageId=" +
+        id
+    );
+
+    this.setState({ loading: false });
+    alert(data.message);
+    if (data.status) {
+      window.location.reload();
     }
   };
 
@@ -328,6 +351,7 @@ class App extends Component {
               imagePreview={this.state.currentImg}
               open={this.state.modal}
               modelClose={this.toggleModal}
+              deleteImage={this.deleteImage}
             />
           </div>
         )}
