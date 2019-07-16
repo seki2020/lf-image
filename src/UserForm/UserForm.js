@@ -1,11 +1,14 @@
 import React from "react";
 
-import { Header, Image, Button, Divider } from "semantic-ui-react";
+import { Header, Image, Button } from "semantic-ui-react";
 import LoginModal from "../Model/LoginModal";
 import SignUpModal from "../Model/SignUpModal";
-export default props => (
+import LogoutComp from "../SignOut/SignOut";
+import { connect } from "react-redux";
+
+const UserForm = props => (
   <div className="user-form">
-    {props.userInfo.email ? (
+    {props.isLogin ? (
       <Header>
         <Image
           className="m-right-10"
@@ -16,17 +19,20 @@ export default props => (
           {props.userInfo.email}
         </span>
 
-        <Button onClick={props.toggleSignIn} id="sign-out">
-          Sign Out
-        </Button>
-        <SignUpModal onSignUpSubmit={props.onSignUpSubmit} />
+        <LogoutComp />
+
+        <SignUpModal />
       </Header>
     ) : (
       <Header>
         {props.userInfo.email}
-        <LoginModal toggleSignIn={props.toggleSignIn} />
-        <SignUpModal onSignUpSubmit={props.onSignUpSubmit} />
+        <LoginModal />
+        <SignUpModal />
       </Header>
     )}
   </div>
 );
+
+const mapStateToProps = state => state;
+
+export default connect(mapStateToProps)(UserForm);

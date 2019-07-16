@@ -1,5 +1,5 @@
 import React, { Component } from "react";
-import { Table, Image, List } from "semantic-ui-react";
+import { Table, Image } from "semantic-ui-react";
 import moment from "moment";
 import "./ImageItem.css";
 

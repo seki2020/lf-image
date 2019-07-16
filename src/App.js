@@ -1,6 +1,7 @@
 import React, { Component } from "react";
+import { connect } from "react-redux";
 import "./App.css";
-import { Container, Dimmer, Loader, Segment, Label } from "semantic-ui-react";
+import { Container, Dimmer, Loader, Label } from "semantic-ui-react";
 
 import ImageForm from "./ImageForm/ImageForm";
 import ImageList from "./ImageList/ImageList";
@@ -60,7 +61,7 @@ class App extends Component {
             TOKEN
         );
 
-        if (res.status == 200) {
+        if (res.status === 200) {
           const labelValue = self.generateLabel(res.data);
           this.BACKUP.Images = res.data;
           this.BACKUP.Labels = labelValue;
@@ -91,7 +92,7 @@ class App extends Component {
     this.handleFilterClear = this.handleFilterClear.bind(this);
     this.handleFilterRemove = this.handleFilterRemove.bind(this);
     this.handleUserSearch = this.handleUserSearch.bind(this);
-    this.onSignUpSubmit = this.onSignUpSubmit.bind(this);
+    // this.onSignUpSubmit = this.onSignUpSubmit.bind(this);
     this.deleteImage = this.deleteImage.bind(this);
   }
 
@@ -123,7 +124,7 @@ class App extends Component {
       );
     });
 
-    return Array.from(labelSet).filter(label => typeof label == "string");
+    return Array.from(labelSet).filter(label => typeof label === "string");
   };
 
   handleSearch = async (keyword, type) => {
@@ -161,7 +162,6 @@ class App extends Component {
 
     //Upload image url
     if (type === ImageFormConst[2]) {
-      debugger;
       const res = await axios.get(
         process.env.REACT_APP_DOMAIN +
           "/webApi/api/v1/images?idToken=" +
@@ -184,7 +184,7 @@ class App extends Component {
         idToken: idToken
       }
     );
-    if (res.status == 200) {
+    if (res.status === 200) {
       let preState = self.state.Images;
       preState.unshift(res.data);
 
@@ -229,7 +229,7 @@ class App extends Component {
   handleFilterRemove = e => {
     this.setState({
       category: [...this.state.category].filter(
-        category => category != e.target.text
+        category => category !== e.target.text
       )
     });
   };
@@ -251,46 +251,46 @@ class App extends Component {
     }
   };
 
-  onSignUpSubmit = e => {
-    e.preventDefault();
-    const username = document.querySelector("#signup-username").value;
-    const psd = document.querySelector("#signup-password").value;
+  // onSignUpSubmit = e => {
+  //   e.preventDefault();
+  //   const username = document.querySelector("#signup-username").value;
+  //   const psd = document.querySelector("#signup-password").value;
 
-    firebase
-      .auth()
-      .createUserWithEmailAndPassword(username, psd)
-      .catch(function(error) {
-        // Handle Errors here.
-        // var errorCode = error.code;
-        // var errorMessage = error.message;
-        alert(error.message);
-        // ...
-      });
-  };
-  toggleSignIn = () => {
-    if (firebase.auth().currentUser) {
-      // [START signout]
-      firebase.auth().signOut();
-      // [END signout]
-    } else {
-      const username = document.querySelector("#login-username").value;
-      const psd = document.querySelector("#login-password").value;
-      firebase
-        .auth()
-        .signInWithEmailAndPassword(username, psd)
-        .catch(function(error) {
-          // Handle Errors here.
-          var errorCode = error.code;
-          var errorMessage = error.message;
-          // [START_EXCLUDE]
-          if (errorCode === "auth/wrong-password") {
-            alert("Wrong password.");
-          } else {
-            alert(errorMessage);
-          }
-        });
-    }
-  };
+  //   firebase
+  //     .auth()
+  //     .createUserWithEmailAndPassword(username, psd)
+  //     .catch(function(error) {
+  //       // Handle Errors here.
+  //       // var errorCode = error.code;
+  //       // var errorMessage = error.message;
+  //       alert(error.message);
+  //       // ...
+  //     });
+  // };
+  // toggleSignIn = () => {
+  //   if (firebase.auth().currentUser) {
+  //     // [START signout]
+  //     firebase.auth().signOut();
+  //     // [END signout]
+  //   } else {
+  //     const username = document.querySelector("#login-username").value;
+  //     const psd = document.querySelector("#login-password").value;
+  //     firebase
+  //       .auth()
+  //       .signInWithEmailAndPassword(username, psd)
+  //       .catch(function(error) {
+  //         // Handle Errors here.
+  //         var errorCode = error.code;
+  //         var errorMessage = error.message;
+  //         // [START_EXCLUDE]
+  //         if (errorCode === "auth/wrong-password") {
+  //           alert("Wrong password.");
+  //         } else {
+  //           alert(errorMessage);
+  //         }
+  //       });
+  //   }
+  // };
   deleteImage = async imageId => {
     const id = this.state.currentImg.Id;
     if (!firebase.auth().currentUser) {
@@ -324,14 +324,8 @@ class App extends Component {
     return (
       <Container>
         <AppTitle title={process.env.REACT_APP_TITLE} firstPage={firstPage} />
-        <UserForm
-          userInfo={userInfo}
-          onSignUpSubmit={this.onSignUpSubmit}
-          toggleSignIn={this.toggleSignIn}
-          handleUserSearch={this.handleUserSearch}
-          handleFilterClear={this.handleFilterClear}
-        />
-        {userInfo.email && (
+        <UserForm />
+        {this.props.isLogin && (
           <div>
             <ImageForm onSearch={this.handleSearch} />
             <Filter
@@ -364,4 +358,6 @@ class App extends Component {
   }
 }
 
-export default App;
+const mapStateToProps = state => state;
+
+export default connect(mapStateToProps)(App);

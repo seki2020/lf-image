@@ -35,7 +35,6 @@ class ImageForm extends Component {
     this.props.onSearch(this.state.queryUrl, this.state.modeVal);
   }
   handleModeChange(e, option) {
-    debugger;
     this.setState({
       modeVal: option.options.filter(doc => doc.key === option.value)[0]
     });
