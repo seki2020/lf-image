@@ -5,6 +5,13 @@ const initialState = {
 
 export default (state = initialState, action) => {
   switch (action.type) {
+    case "USER_LOGIN": {
+      return {
+        ...state,
+        isLogin: true,
+        userInfo: action.payload.userInfo
+      };
+    }
     case "CALL_LOGIN_SUCCESS": {
       const payload = action.payload.userObj;
       console.log("CALL_LOGIN_SUCCESS", payload);

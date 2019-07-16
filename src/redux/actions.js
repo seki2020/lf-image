@@ -1,12 +1,9 @@
 import firebase from "../Config/config";
 
-// export const loginSync = (username, password) => ({
-//     type: "USER_LOGIN",
-//     payload: {
-//         username,
-//         password
-//     }
-// });
+export const loginSync = userInfo => ({
+  type: "USER_LOGIN",
+  payload: { userInfo }
+});
 
 export const logout = () => {
   return dispatch => {

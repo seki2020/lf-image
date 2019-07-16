@@ -3,6 +3,8 @@ import { connect } from "react-redux";
 import "./App.css";
 import { Container, Dimmer, Loader, Label } from "semantic-ui-react";
 
+import _ from "lodash";
+
 import ImageForm from "./ImageForm/ImageForm";
 import ImageList from "./ImageList/ImageList";
 import ImagePreview from "./ImagePreview/ImagePreview";
@@ -13,6 +15,7 @@ import firebase from "./Config/config";
 // import 'firebase/database'
 import axios from "axios";
 import ImageFormConst from "./Constant/ImageFormConst.js";
+import { loginSync } from "./redux/actions";
 
 const storageRef = firebase.storage().ref();
 //firestore
@@ -39,8 +42,6 @@ class App extends Component {
   constructor(props) {
     super(props);
 
-    const self = this;
-
     // setTimeout(() => {
     //   self.setState({ firstPage: false });
     // }, 3000);
@@ -48,8 +49,11 @@ class App extends Component {
     firebase.auth().onAuthStateChanged(async user => {
       if (user) {
         // User is signed in.
+        debugger;
         console.log("User sign in");
-        self.setState({ userInfo: user });
+        //todo dispatch a login action
+        this.props.loginSync(user);
+        // this.setState({ userInfo: user ,isLogin:true});
 
         const TOKEN = await firebase
           .auth()
@@ -62,10 +66,10 @@ class App extends Component {
         );
 
         if (res.status === 200) {
-          const labelValue = self.generateLabel(res.data);
+          const labelValue = this.generateLabel(res.data);
           this.BACKUP.Images = res.data;
           this.BACKUP.Labels = labelValue;
-          self.setState({
+          this.setState({
             Images: res.data,
             loading: false,
             labels: labelValue
@@ -76,8 +80,9 @@ class App extends Component {
       } else {
         console.log("User sign out");
         this.BACKUP = {};
-        self.setState({
+        this.setState({
           userInfo: {},
+          isLogin: false,
           Images: [],
           category: [],
           labels: []
@@ -132,6 +137,13 @@ class App extends Component {
       alert("Please Login and try again.");
       return;
     }
+    if (!keyword) {
+      this.setState({
+        loading: false,
+        Images: this.BACKUP.Images,
+        Labels: this.BACKUP.Labels
+      });
+    }
 
     this.setState({ loading: true });
     const TOKEN = await firebase
@@ -143,10 +155,9 @@ class App extends Component {
       this.callDetectLabelApi(keyword, this, TOKEN);
     }
 
-    //Search image by label name
+    //Upload image url
     if (type === ImageFormConst[1]) {
       const userRef = storageRef.child(keyword.name);
-
       const snapshot = await userRef.put(keyword);
 
       if (snapshot.state === "success") {
@@ -160,7 +171,7 @@ class App extends Component {
       }
     }
 
-    //Upload image url
+    //Search image by label name
     if (type === ImageFormConst[2]) {
       const res = await axios.get(
         process.env.REACT_APP_DOMAIN +
@@ -169,7 +180,10 @@ class App extends Component {
           "&kw=" +
           keyword
       );
-
+      if (_.isEmpty(res.data)) {
+        this.setState({ Images: [], labels: [], loading: false });
+        return;
+      }
       const labelsList = this.generateLabel(res.data);
       this.setState({ Images: res.data, labels: labelsList, loading: false });
       this.labelsBackup = labelsList;
@@ -184,6 +198,10 @@ class App extends Component {
         idToken: idToken
       }
     );
+    if (res.data.code === "ENOENT") {
+      this.setState({ Images: [], labels: [], loading: false });
+      return;
+    }
     if (res.status === 200) {
       let preState = self.state.Images;
       preState.unshift(res.data);
@@ -360,4 +378,7 @@ class App extends Component {
 
 const mapStateToProps = state => state;
 
-export default connect(mapStateToProps)(App);
+export default connect(
+  mapStateToProps,
+  { loginSync }
+)(App);

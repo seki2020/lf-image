@@ -39,13 +39,12 @@ exports.webApi = functions.https.onRequest(main);
 
 // View all images or with keyword
 app.get("/images", async (req, res, next) => {
+  const { idToken, kw } = req.query;
   try {
-    const { idToken, kw } = req.query;
+    //To validate credential
+    await admin.auth().verifyIdToken(req.query.idToken);
 
-    const decodedToken = await admin.auth().verifyIdToken(req.query.idToken);
-    let uid = decodedToken.uid;
-    if (!uid) res.send("Auth failed");
-
+    //To get records from database
     const snapshot = await firebaseHelper.firestore.queryData(
       db,
       IMAGECOLLECTION,
@@ -53,28 +52,37 @@ app.get("/images", async (req, res, next) => {
       ["timestamp", "desc"]
     );
 
+    //In case the document is not existed
     if (snapshot === ERR.NoSuchDoc) {
       res.status(500).send(ERR.NoSuchDoc);
     }
 
-    let data = _.values(snapshot);
+    //Convert data model
     let dataIds = _.keys(snapshot);
-    data.map((doc, index) => {
-      return (doc.Id = dataIds[index]);
+    let data = _.values(snapshot).map((doc, index) => {
+      const newDoc = doc;
+      newDoc.Id = dataIds[index];
+      return newDoc;
     });
 
-    //Search by keyword
+    //Filter by keyword
     if (kw) {
       console.log("keyword", kw);
       data = data.filter(image => {
         return (
           image.apiResult.filter(api => {
-            return api.description.includes(kw);
+            const kwTrim2 = _.trim(kw).toLowerCase();
+            const DescriptionTrim = _.trim(api.description).toLowerCase();
+            console.log(
+              DescriptionTrim.includes(kwTrim2) || DescriptionTrim == kwTrim2
+            );
+            return (
+              DescriptionTrim.includes(kwTrim2) || DescriptionTrim == kwTrim2
+            );
           }).length > 0
         );
       });
     }
-
     res.status(200).send(data);
   } catch (err) {
     res.send(err);
@@ -83,17 +91,12 @@ app.get("/images", async (req, res, next) => {
 
 app.post("/images/", async (request, response, next) => {
   //Inbound query string
-  const imageUrl = _.trim(request.body.imgUrl || request.query.imgUrl);
-  const idToken = request.body.idToken || request.query.idToken;
+  const imageUrl = _.trim(request.body.imgUrl);
+  const idToken = request.body.idToken;
   console.log("image to add", imageUrl);
 
   if (!imageUrl) response.send("Image Url empty.");
   if (!idToken) response.send("Auth failed.");
-
-  //todo...it has different effect on Browser and postman,
-  //In Postman we use req.query.imgUrl to get params
-  //In Brower we use req.body.imgUrl
-  //It is wired
 
   try {
     // ckeck session validation
@@ -114,7 +117,6 @@ app.post("/images/", async (request, response, next) => {
     );
 
     //return newly created record to client
-    //todo...propect to move it away
     const newRec = await firebaseHelper.firestore.getDocument(
       db,
       IMAGECOLLECTION,
