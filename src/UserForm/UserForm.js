@@ -16,26 +16,23 @@ const UserForm = props => (
           src="https://firebasestorage.googleapis.com/v0/b/logical-fabric.appspot.com/o/usermanage%2Fpatrick.png?alt=media&token=df041a6b-8856-4d41-a5c0-8bc4d9583c8c"
         />
         <span className="m-right-10" id="login-user-email">
-          {props.userInfo.username}
+          {props.userInfo.email}
         </span>
 
         <LogoutComp />
 
-        <SignUpModal onSignUpSubmit={props.onSignUpSubmit} />
+        <SignUpModal />
       </Header>
     ) : (
       <Header>
         {props.userInfo.email}
         <LoginModal />
-        <SignUpModal onSignUpSubmit={props.onSignUpSubmit} />
+        <SignUpModal />
       </Header>
     )}
   </div>
 );
 
-const mapStateToProps = state => ({
-  userInfo: state.userInfo,
-  isLogin: state.isLogin
-});
+const mapStateToProps = state => state;
 
 export default connect(mapStateToProps)(UserForm);

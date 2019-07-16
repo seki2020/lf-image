@@ -5,16 +5,13 @@ const initialState = {
 
 export default (state = initialState, action) => {
   switch (action.type) {
-    case "USER_LOGIN": {
-      const { username, password } = action.payload;
-      debugger;
-      //call auth server with credential
-      //todo...
-
+    case "CALL_LOGIN_SUCCESS": {
+      const payload = action.payload.userObj;
+      console.log("CALL_LOGIN_SUCCESS", payload);
       return {
         ...state,
         isLogin: true,
-        userInfo: { username, password }
+        userInfo: payload
       };
     }
     case "USER_LOGOUT": {
@@ -24,6 +21,17 @@ export default (state = initialState, action) => {
         ...state,
         isLogin: false,
         userInfo: {}
+      };
+    }
+    case "CALL_SIGNUP_SUCCESS": {
+      //todo... call logout server
+      const payload = action.payload.userObj;
+
+      console.log("CALL_SIGNUP_SUCCESS", payload);
+      return {
+        ...state,
+        isLogin: true,
+        userInfo: payload
       };
     }
     default:

@@ -91,7 +91,7 @@ class App extends Component {
     this.handleFilterClear = this.handleFilterClear.bind(this);
     this.handleFilterRemove = this.handleFilterRemove.bind(this);
     this.handleUserSearch = this.handleUserSearch.bind(this);
-    this.onSignUpSubmit = this.onSignUpSubmit.bind(this);
+    // this.onSignUpSubmit = this.onSignUpSubmit.bind(this);
     this.deleteImage = this.deleteImage.bind(this);
   }
 
@@ -161,7 +161,6 @@ class App extends Component {
 
     //Upload image url
     if (type === ImageFormConst[2]) {
-      debugger;
       const res = await axios.get(
         process.env.REACT_APP_DOMAIN +
           "/webApi/api/v1/images?idToken=" +
@@ -251,46 +250,46 @@ class App extends Component {
     }
   };
 
-  onSignUpSubmit = e => {
-    e.preventDefault();
-    const username = document.querySelector("#signup-username").value;
-    const psd = document.querySelector("#signup-password").value;
+  // onSignUpSubmit = e => {
+  //   e.preventDefault();
+  //   const username = document.querySelector("#signup-username").value;
+  //   const psd = document.querySelector("#signup-password").value;
 
-    firebase
-      .auth()
-      .createUserWithEmailAndPassword(username, psd)
-      .catch(function(error) {
-        // Handle Errors here.
-        // var errorCode = error.code;
-        // var errorMessage = error.message;
-        alert(error.message);
-        // ...
-      });
-  };
-  toggleSignIn = () => {
-    if (firebase.auth().currentUser) {
-      // [START signout]
-      firebase.auth().signOut();
-      // [END signout]
-    } else {
-      const username = document.querySelector("#login-username").value;
-      const psd = document.querySelector("#login-password").value;
-      firebase
-        .auth()
-        .signInWithEmailAndPassword(username, psd)
-        .catch(function(error) {
-          // Handle Errors here.
-          var errorCode = error.code;
-          var errorMessage = error.message;
-          // [START_EXCLUDE]
-          if (errorCode === "auth/wrong-password") {
-            alert("Wrong password.");
-          } else {
-            alert(errorMessage);
-          }
-        });
-    }
-  };
+  //   firebase
+  //     .auth()
+  //     .createUserWithEmailAndPassword(username, psd)
+  //     .catch(function(error) {
+  //       // Handle Errors here.
+  //       // var errorCode = error.code;
+  //       // var errorMessage = error.message;
+  //       alert(error.message);
+  //       // ...
+  //     });
+  // };
+  // toggleSignIn = () => {
+  //   if (firebase.auth().currentUser) {
+  //     // [START signout]
+  //     firebase.auth().signOut();
+  //     // [END signout]
+  //   } else {
+  //     const username = document.querySelector("#login-username").value;
+  //     const psd = document.querySelector("#login-password").value;
+  //     firebase
+  //       .auth()
+  //       .signInWithEmailAndPassword(username, psd)
+  //       .catch(function(error) {
+  //         // Handle Errors here.
+  //         var errorCode = error.code;
+  //         var errorMessage = error.message;
+  //         // [START_EXCLUDE]
+  //         if (errorCode === "auth/wrong-password") {
+  //           alert("Wrong password.");
+  //         } else {
+  //           alert(errorMessage);
+  //         }
+  //       });
+  //   }
+  // };
   deleteImage = async imageId => {
     const id = this.state.currentImg.Id;
     if (!firebase.auth().currentUser) {
@@ -324,13 +323,7 @@ class App extends Component {
     return (
       <Container>
         <AppTitle title={process.env.REACT_APP_TITLE} firstPage={firstPage} />
-        <UserForm
-          userInfo={userInfo}
-          onSignUpSubmit={this.onSignUpSubmit}
-          toggleSignIn={this.toggleSignIn}
-          handleUserSearch={this.handleUserSearch}
-          handleFilterClear={this.handleFilterClear}
-        />
+        <UserForm />
         {userInfo.email && (
           <div>
             <ImageForm onSearch={this.handleSearch} />

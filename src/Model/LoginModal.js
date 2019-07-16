@@ -9,26 +9,21 @@ class LoginModal extends React.Component {
   constructor(props) {
     super(props);
     this.state = { modalOpen: false };
+    this.usernameRef = React.createRef();
+    this.psdRef = React.createRef();
 
     this.onSubmit = this.onSubmit.bind(this);
   }
   handleOpen = () => this.setState({ modalOpen: true });
   handleClose = () => this.setState({ modalOpen: false });
 
-  // componentDidUpdate(){
-  //   const isLogin = this.props.isLogin
-  //   if(isLogin){
-  //     this.setState({modalOpen:false})
-  //   }
-  // }
-
   onSubmit = e => {
     e.preventDefault();
     //...todo use ref instead later
     const un = e.target.querySelector("#login-username").value;
     const psd = e.target.querySelector("#login-password").value;
-    const { isLogin } = this.props.login(un, psd);
-    isLogin && this.setState({ modalOpen: false });
+
+    this.props.login(un, psd);
   };
 
   render() {
@@ -76,10 +71,7 @@ class LoginModal extends React.Component {
   }
 }
 
-const mapStateToProps = state => {
-  debugger;
-  return { isLogin: state.isLogin };
-};
+const mapStateToProps = state => state;
 
 export default connect(
   mapStateToProps,
