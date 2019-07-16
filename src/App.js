@@ -1,6 +1,6 @@
 import React, { Component } from "react";
 import "./App.css";
-import { Container, Dimmer, Loader, Segment, Label } from "semantic-ui-react";
+import { Container, Dimmer, Loader, Label } from "semantic-ui-react";
 
 import ImageForm from "./ImageForm/ImageForm";
 import ImageList from "./ImageList/ImageList";
@@ -60,7 +60,7 @@ class App extends Component {
             TOKEN
         );
 
-        if (res.status == 200) {
+        if (res.status === 200) {
           const labelValue = self.generateLabel(res.data);
           this.BACKUP.Images = res.data;
           this.BACKUP.Labels = labelValue;
@@ -123,7 +123,7 @@ class App extends Component {
       );
     });
 
-    return Array.from(labelSet).filter(label => typeof label == "string");
+    return Array.from(labelSet).filter(label => typeof label === "string");
   };
 
   handleSearch = async (keyword, type) => {
@@ -184,7 +184,7 @@ class App extends Component {
         idToken: idToken
       }
     );
-    if (res.status == 200) {
+    if (res.status === 200) {
       let preState = self.state.Images;
       preState.unshift(res.data);
 
@@ -229,7 +229,7 @@ class App extends Component {
   handleFilterRemove = e => {
     this.setState({
       category: [...this.state.category].filter(
-        category => category != e.target.text
+        category => category !== e.target.text
       )
     });
   };

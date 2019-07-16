@@ -1,6 +1,6 @@
 import React from "react";
 
-import { Header, Image, Button, Divider } from "semantic-ui-react";
+import { Header, Image, Button } from "semantic-ui-react";
 import LoginModal from "../Model/LoginModal";
 import SignUpModal from "../Model/SignUpModal";
 export default props => (
