@@ -1,4 +1,5 @@
 import React, { Component } from "react";
+import { connect } from "react-redux";
 import "./App.css";
 import { Container, Dimmer, Loader, Label } from "semantic-ui-react";
 
@@ -324,7 +325,7 @@ class App extends Component {
       <Container>
         <AppTitle title={process.env.REACT_APP_TITLE} firstPage={firstPage} />
         <UserForm />
-        {userInfo.email && (
+        {this.props.isLogin && (
           <div>
             <ImageForm onSearch={this.handleSearch} />
             <Filter
@@ -357,4 +358,6 @@ class App extends Component {
   }
 }
 
-export default App;
+const mapStateToProps = state => state;
+
+export default connect(mapStateToProps)(App);
