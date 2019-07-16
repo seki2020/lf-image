@@ -1,10 +1,35 @@
-import React, { Component } from "react";
+import React from "react";
 
 import { Modal, Form, Button, Divider } from "semantic-ui-react";
-export default class LoginModal extends Component {
-  state = { modalOpen: false };
+
+import { connect } from "react-redux";
+import { login } from "../redux/actions";
+
+class LoginModal extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = { modalOpen: false };
+
+    this.onSubmit = this.onSubmit.bind(this);
+  }
   handleOpen = () => this.setState({ modalOpen: true });
   handleClose = () => this.setState({ modalOpen: false });
+
+  // componentDidUpdate(){
+  //   const isLogin = this.props.isLogin
+  //   if(isLogin){
+  //     this.setState({modalOpen:false})
+  //   }
+  // }
+
+  onSubmit = e => {
+    e.preventDefault();
+    //...todo use ref instead later
+    const un = e.target.querySelector("#login-username").value;
+    const psd = e.target.querySelector("#login-password").value;
+    const { isLogin } = this.props.login(un, psd);
+    isLogin && this.setState({ modalOpen: false });
+  };
 
   render() {
     return (
@@ -20,7 +45,7 @@ export default class LoginModal extends Component {
       >
         <Modal.Header>Login</Modal.Header>
         <Modal.Content>
-          <Form>
+          <Form onSubmit={this.onSubmit}>
             <Form.Group widths="equal">
               <Form.Field
                 label="Username"
@@ -37,11 +62,7 @@ export default class LoginModal extends Component {
                 placeholder=""
               />
             </Form.Group>
-            <Button
-              type="submit"
-              id="toggle-login"
-              onClick={this.props.toggleSignIn}
-            >
+            <Button type="submit" id="toggle-login">
               Submit
             </Button>
             <Button type="reset" onClick={this.handleClose}>
@@ -54,3 +75,13 @@ export default class LoginModal extends Component {
     );
   }
 }
+
+const mapStateToProps = state => {
+  debugger;
+  return { isLogin: state.isLogin };
+};
+
+export default connect(
+  mapStateToProps,
+  { login }
+)(LoginModal);
