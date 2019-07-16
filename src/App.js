@@ -5,16 +5,16 @@ import { Container, Dimmer, Loader, Label } from "semantic-ui-react";
 
 import _ from "lodash";
 
-import ImageForm from "./ImageForm/ImageForm";
-import ImageList from "./ImageList/ImageList";
-import ImagePreview from "./ImagePreview/ImagePreview";
-import UserForm from "./UserForm/UserForm";
-import Filter from "./Filter";
+import ImageForm from "./components/ImageForm/ImageForm";
+import ImageList from "./components/ImageList/ImageList";
+import ImagePreview from "./components/ImagePreview/ImagePreview";
+import UserForm from "./components/UserForm/UserForm";
+import Filter from "./components/Filter";
 
 import firebase from "./Config/config";
 // import 'firebase/database'
 import axios from "axios";
-import ImageFormConst from "./Constant/ImageFormConst.js";
+import ImageFormConst from "./components/Constant/ImageFormConst.js";
 import { loginSync } from "./redux/actions";
 
 const storageRef = firebase.storage().ref();
