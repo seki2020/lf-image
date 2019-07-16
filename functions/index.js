@@ -16,6 +16,10 @@ admin.initializeApp({
   credential: admin.credential.cert(serviceAccount)
 });
 
+const ERR = {
+  NoSuchDoc: "No such document!"
+};
+
 const db = admin.firestore();
 
 const app = express();
@@ -33,12 +37,6 @@ const IMAGECOLLECTION = "images";
 
 exports.webApi = functions.https.onRequest(main);
 
-// app.get("/images/:imageId", (req, res, next) => {
-//   firebaseHelper.firestore
-//     .getDocument(db, IMAGECOLLECTION, req.params.imageId)
-//     .then(doc => res.status(200).send(doc));
-// });
-
 // View all images or with keyword
 app.get("/images", async (req, res, next) => {
   try {
@@ -54,6 +52,10 @@ app.get("/images", async (req, res, next) => {
       [],
       ["timestamp", "desc"]
     );
+
+    if (snapshot === ERR.NoSuchDoc) {
+      res.status(500).send(ERR.NoSuchDoc);
+    }
 
     let data = _.values(snapshot);
     let dataIds = _.keys(snapshot);
@@ -73,7 +75,6 @@ app.get("/images", async (req, res, next) => {
       });
     }
 
-    console.log("data with keyword", data);
     res.status(200).send(data);
   } catch (err) {
     res.send(err);
