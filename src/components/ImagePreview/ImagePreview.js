@@ -3,16 +3,6 @@ import { Button, List, Image, Modal, Icon } from "semantic-ui-react";
 import moment from "moment";
 
 class ImagePreview extends Component {
-  // constructor(props){
-  //     super(props)
-  //     // this.handleClose = this.handleClose.bind(this)
-  //     // this.state={
-  //     //     modalOpen:props.open
-  //     // }
-  // }
-  // handleClose(){
-  //     this.props.modelClose()
-  // }
   render() {
     const api = this.props.imagePreview.apiResult;
     return (

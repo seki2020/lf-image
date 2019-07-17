@@ -42,18 +42,11 @@ class App extends Component {
   constructor(props) {
     super(props);
 
-    // setTimeout(() => {
-    //   self.setState({ firstPage: false });
-    // }, 3000);
-
     firebase.auth().onAuthStateChanged(async user => {
       if (user) {
-        // User is signed in.
-        debugger;
         console.log("User sign in");
-        //todo dispatch a login action
         this.props.loginSync(user);
-        // this.setState({ userInfo: user ,isLogin:true});
+        this.setState({ loading: true });
 
         const TOKEN = await firebase
           .auth()
@@ -71,12 +64,12 @@ class App extends Component {
           this.BACKUP.Labels = labelValue;
           this.setState({
             Images: res.data,
-            loading: false,
             labels: labelValue
           });
         } else {
           console.log("get images error");
         }
+        this.setState({ loading: false });
       } else {
         console.log("User sign out");
         this.BACKUP = {};
@@ -90,31 +83,29 @@ class App extends Component {
       }
     });
 
+    this.state = {
+      Images: [],
+      currentImg: { imgUrl: "", apiResult: [] },
+      modal: false,
+      loading: false,
+      firstPage: false,
+      labels: [],
+      category: [],
+      userInfo: {}
+    };
+
     this.handleSearch = this.handleSearch.bind(this);
     this.imagePreviewFunc = this.imagePreviewFunc.bind(this);
-    this.toggleModal = this.toggleModal.bind(this);
     this.handleLabelClick = this.handleLabelClick.bind(this);
     this.handleFilterClear = this.handleFilterClear.bind(this);
     this.handleFilterRemove = this.handleFilterRemove.bind(this);
     this.handleUserSearch = this.handleUserSearch.bind(this);
-    // this.onSignUpSubmit = this.onSignUpSubmit.bind(this);
     this.deleteImage = this.deleteImage.bind(this);
   }
 
   BACKUP = {
     Images: [],
     Labels: []
-  };
-
-  state = {
-    Images: [],
-    currentImg: { imgUrl: "", apiResult: [] },
-    modal: false,
-    loading: false,
-    firstPage: false,
-    labels: [],
-    category: [],
-    userInfo: {}
   };
 
   generateLabel = images => {
@@ -220,12 +211,6 @@ class App extends Component {
     });
   };
 
-  toggleModal = () => {
-    this.setState({
-      modal: false
-    });
-  };
-
   handleLabelClick = e => {
     const des = e.target.text;
     const { Images } = this.state;
@@ -241,9 +226,11 @@ class App extends Component {
       })
     });
   };
+
   handleFilterClear = () => {
     this.setState({ Images: this.BACKUP.Images, category: [] });
   };
+
   handleFilterRemove = e => {
     this.setState({
       category: [...this.state.category].filter(
@@ -251,6 +238,7 @@ class App extends Component {
       )
     });
   };
+
   handleUserSearch = e => {
     const searchStr = e;
     const labelsBackup = this.BACKUP.Labels;
@@ -269,46 +257,6 @@ class App extends Component {
     }
   };
 
-  // onSignUpSubmit = e => {
-  //   e.preventDefault();
-  //   const username = document.querySelector("#signup-username").value;
-  //   const psd = document.querySelector("#signup-password").value;
-
-  //   firebase
-  //     .auth()
-  //     .createUserWithEmailAndPassword(username, psd)
-  //     .catch(function(error) {
-  //       // Handle Errors here.
-  //       // var errorCode = error.code;
-  //       // var errorMessage = error.message;
-  //       alert(error.message);
-  //       // ...
-  //     });
-  // };
-  // toggleSignIn = () => {
-  //   if (firebase.auth().currentUser) {
-  //     // [START signout]
-  //     firebase.auth().signOut();
-  //     // [END signout]
-  //   } else {
-  //     const username = document.querySelector("#login-username").value;
-  //     const psd = document.querySelector("#login-password").value;
-  //     firebase
-  //       .auth()
-  //       .signInWithEmailAndPassword(username, psd)
-  //       .catch(function(error) {
-  //         // Handle Errors here.
-  //         var errorCode = error.code;
-  //         var errorMessage = error.message;
-  //         // [START_EXCLUDE]
-  //         if (errorCode === "auth/wrong-password") {
-  //           alert("Wrong password.");
-  //         } else {
-  //           alert(errorMessage);
-  //         }
-  //       });
-  //   }
-  // };
   deleteImage = async imageId => {
     const id = this.state.currentImg.Id;
     if (!firebase.auth().currentUser) {
@@ -337,7 +285,7 @@ class App extends Component {
   };
 
   render() {
-    const { firstPage, labels, userInfo, category } = this.state;
+    const { firstPage, labels, category } = this.state;
 
     return (
       <Container>
@@ -362,7 +310,7 @@ class App extends Component {
             <ImagePreview
               imagePreview={this.state.currentImg}
               open={this.state.modal}
-              modelClose={this.toggleModal}
+              modelClose={() => this.setState({ modal: false })}
               deleteImage={this.deleteImage}
             />
           </div>
