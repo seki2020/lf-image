@@ -1,7 +1,6 @@
 import React, { Component } from "react";
 import { Dropdown, Segment, Grid } from "semantic-ui-react";
 import _ from "lodash";
-import "./ImageForm.css";
 import methodOptions from "../Constant/ImageFormConst";
 
 class ImageForm extends Component {
