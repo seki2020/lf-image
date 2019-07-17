@@ -3,17 +3,8 @@ import { Button, List, Image, Modal, Icon } from "semantic-ui-react";
 import moment from "moment";
 
 class ImagePreview extends Component {
-  // constructor(props){
-  //     super(props)
-  //     // this.handleClose = this.handleClose.bind(this)
-  //     // this.state={
-  //     //     modalOpen:props.open
-  //     // }
-  // }
-  // handleClose(){
-  //     this.props.modelClose()
-  // }
   render() {
+    const api = this.props.imagePreview.apiResult;
     return (
       <Modal open={this.props.open}>
         <Modal.Header>
@@ -25,9 +16,10 @@ class ImagePreview extends Component {
           <Image wrapped size="medium" src={this.props.imagePreview.imgUrl} />
           <Modal.Description>
             <List>
-              {this.props.imagePreview.apiResult.map((doc, index) => {
-                return <List.Item key={index}>{doc.description}</List.Item>;
-              })}
+              {api &&
+                api.map((doc, index) => {
+                  return <List.Item key={index}>{doc.description}</List.Item>;
+                })}
             </List>
           </Modal.Description>
         </Modal.Content>

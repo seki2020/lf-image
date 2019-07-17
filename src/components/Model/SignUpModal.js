@@ -2,7 +2,7 @@ import React, { Component } from "react";
 
 import { Modal, Form, Button, Divider, Ref } from "semantic-ui-react";
 import { connect } from "react-redux";
-import { signup } from "../redux/actions";
+import { signup } from "../../redux/actions";
 
 class SignupModal extends Component {
   constructor(props) {

@@ -3,7 +3,7 @@ import React from "react";
 import { Modal, Form, Button, Divider } from "semantic-ui-react";
 
 import { connect } from "react-redux";
-import { login } from "../redux/actions";
+import { login } from "../../redux/actions";
 
 class LoginModal extends React.Component {
   constructor(props) {

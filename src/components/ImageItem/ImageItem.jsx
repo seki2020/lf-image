@@ -24,16 +24,17 @@ class ImageItem extends Component {
             verticalAlign="middle"
           />
         </Table.Cell>
-        {apiResult.map((item, index) => {
-          if (index < 5) {
-            return (
-              <Table.Cell key={index}>
-                <p className="description">{item.description}</p>
-                <p>{Math.round(item.score * 10000) / 100 + "%"}</p>
-              </Table.Cell>
-            );
-          }
-        })}
+        {apiResult &&
+          apiResult.map((item, index) => {
+            if (index < 5) {
+              return (
+                <Table.Cell key={index}>
+                  <p className="description">{item.description}</p>
+                  <p>{Math.round(item.score * 10000) / 100 + "%"}</p>
+                </Table.Cell>
+              );
+            }
+          })}
         <Table.Cell>
           <p>
             {new moment(this.props.image.timestamp).format("YYYY-M-D hh:mm")}

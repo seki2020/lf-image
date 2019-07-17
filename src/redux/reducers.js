@@ -1,3 +1,6 @@
+import ACTION from "./action-const";
+
+//state modal
 const initialState = {
   isLogin: false,
   userInfo: {}
@@ -5,7 +8,14 @@ const initialState = {
 
 export default (state = initialState, action) => {
   switch (action.type) {
-    case "CALL_LOGIN_SUCCESS": {
+    case ACTION["USER_LOGIN"]: {
+      return {
+        ...state,
+        isLogin: true,
+        userInfo: action.payload.userInfo
+      };
+    }
+    case ACTION["CALL_LOGIN_SUCCESS"]: {
       const payload = action.payload.userObj;
       console.log("CALL_LOGIN_SUCCESS", payload);
       return {
@@ -14,7 +24,7 @@ export default (state = initialState, action) => {
         userInfo: payload
       };
     }
-    case "USER_LOGOUT": {
+    case ACTION["USER_LOGOUT"]: {
       //todo... call logout server
 
       return {
@@ -23,7 +33,7 @@ export default (state = initialState, action) => {
         userInfo: {}
       };
     }
-    case "CALL_SIGNUP_SUCCESS": {
+    case ACTION["CALL_SIGNUP_SUCCESS"]: {
       //todo... call logout server
       const payload = action.payload.userObj;
 

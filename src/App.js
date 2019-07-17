@@ -3,16 +3,19 @@ import { connect } from "react-redux";
 import "./App.css";
 import { Container, Dimmer, Loader, Label } from "semantic-ui-react";
 
-import ImageForm from "./ImageForm/ImageForm";
-import ImageList from "./ImageList/ImageList";
-import ImagePreview from "./ImagePreview/ImagePreview";
-import UserForm from "./UserForm/UserForm";
-import Filter from "./Filter";
+import _ from "lodash";
+
+import ImageForm from "./components/ImageForm/ImageForm";
+import ImageList from "./components/ImageList/ImageList";
+import ImagePreview from "./components/ImagePreview/ImagePreview";
+import UserForm from "./components/UserForm/UserForm";
+import Filter from "./components/Filter";
 
 import firebase from "./Config/config";
 // import 'firebase/database'
 import axios from "axios";
-import ImageFormConst from "./Constant/ImageFormConst.js";
+import ImageFormConst from "./components/Constant/ImageFormConst.js";
+import { loginSync } from "./redux/actions";
 
 const storageRef = firebase.storage().ref();
 //firestore
@@ -39,17 +42,11 @@ class App extends Component {
   constructor(props) {
     super(props);
 
-    const self = this;
-
-    // setTimeout(() => {
-    //   self.setState({ firstPage: false });
-    // }, 3000);
-
     firebase.auth().onAuthStateChanged(async user => {
       if (user) {
-        // User is signed in.
         console.log("User sign in");
-        self.setState({ userInfo: user });
+        this.props.loginSync(user);
+        this.setState({ loading: true });
 
         const TOKEN = await firebase
           .auth()
@@ -62,22 +59,23 @@ class App extends Component {
         );
 
         if (res.status === 200) {
-          const labelValue = self.generateLabel(res.data);
+          const labelValue = this.generateLabel(res.data);
           this.BACKUP.Images = res.data;
           this.BACKUP.Labels = labelValue;
-          self.setState({
+          this.setState({
             Images: res.data,
-            loading: false,
             labels: labelValue
           });
         } else {
           console.log("get images error");
         }
+        this.setState({ loading: false });
       } else {
         console.log("User sign out");
         this.BACKUP = {};
-        self.setState({
+        this.setState({
           userInfo: {},
+          isLogin: false,
           Images: [],
           category: [],
           labels: []
@@ -85,31 +83,29 @@ class App extends Component {
       }
     });
 
+    this.state = {
+      Images: [],
+      currentImg: { imgUrl: "", apiResult: [] },
+      modal: false,
+      loading: false,
+      firstPage: false,
+      labels: [],
+      category: [],
+      userInfo: {}
+    };
+
     this.handleSearch = this.handleSearch.bind(this);
     this.imagePreviewFunc = this.imagePreviewFunc.bind(this);
-    this.toggleModal = this.toggleModal.bind(this);
     this.handleLabelClick = this.handleLabelClick.bind(this);
     this.handleFilterClear = this.handleFilterClear.bind(this);
     this.handleFilterRemove = this.handleFilterRemove.bind(this);
     this.handleUserSearch = this.handleUserSearch.bind(this);
-    // this.onSignUpSubmit = this.onSignUpSubmit.bind(this);
     this.deleteImage = this.deleteImage.bind(this);
   }
 
   BACKUP = {
     Images: [],
     Labels: []
-  };
-
-  state = {
-    Images: [],
-    currentImg: { imgUrl: "", apiResult: [] },
-    modal: false,
-    loading: false,
-    firstPage: false,
-    labels: [],
-    category: [],
-    userInfo: {}
   };
 
   generateLabel = images => {
@@ -132,6 +128,13 @@ class App extends Component {
       alert("Please Login and try again.");
       return;
     }
+    if (!keyword) {
+      this.setState({
+        loading: false,
+        Images: this.BACKUP.Images,
+        Labels: this.BACKUP.Labels
+      });
+    }
 
     this.setState({ loading: true });
     const TOKEN = await firebase
@@ -143,10 +146,9 @@ class App extends Component {
       this.callDetectLabelApi(keyword, this, TOKEN);
     }
 
-    //Search image by label name
+    //Upload image url
     if (type === ImageFormConst[1]) {
       const userRef = storageRef.child(keyword.name);
-
       const snapshot = await userRef.put(keyword);
 
       if (snapshot.state === "success") {
@@ -160,7 +162,7 @@ class App extends Component {
       }
     }
 
-    //Upload image url
+    //Search image by label name
     if (type === ImageFormConst[2]) {
       const res = await axios.get(
         process.env.REACT_APP_DOMAIN +
@@ -169,7 +171,10 @@ class App extends Component {
           "&kw=" +
           keyword
       );
-
+      if (_.isEmpty(res.data)) {
+        this.setState({ Images: [], labels: [], loading: false });
+        return;
+      }
       const labelsList = this.generateLabel(res.data);
       this.setState({ Images: res.data, labels: labelsList, loading: false });
       this.labelsBackup = labelsList;
@@ -184,6 +189,10 @@ class App extends Component {
         idToken: idToken
       }
     );
+    if (res.data.code === "ENOENT") {
+      this.setState({ Images: [], labels: [], loading: false });
+      return;
+    }
     if (res.status === 200) {
       let preState = self.state.Images;
       preState.unshift(res.data);
@@ -202,12 +211,6 @@ class App extends Component {
     });
   };
 
-  toggleModal = () => {
-    this.setState({
-      modal: false
-    });
-  };
-
   handleLabelClick = e => {
     const des = e.target.text;
     const { Images } = this.state;
@@ -223,9 +226,11 @@ class App extends Component {
       })
     });
   };
+
   handleFilterClear = () => {
     this.setState({ Images: this.BACKUP.Images, category: [] });
   };
+
   handleFilterRemove = e => {
     this.setState({
       category: [...this.state.category].filter(
@@ -233,6 +238,7 @@ class App extends Component {
       )
     });
   };
+
   handleUserSearch = e => {
     const searchStr = e;
     const labelsBackup = this.BACKUP.Labels;
@@ -251,46 +257,6 @@ class App extends Component {
     }
   };
 
-  // onSignUpSubmit = e => {
-  //   e.preventDefault();
-  //   const username = document.querySelector("#signup-username").value;
-  //   const psd = document.querySelector("#signup-password").value;
-
-  //   firebase
-  //     .auth()
-  //     .createUserWithEmailAndPassword(username, psd)
-  //     .catch(function(error) {
-  //       // Handle Errors here.
-  //       // var errorCode = error.code;
-  //       // var errorMessage = error.message;
-  //       alert(error.message);
-  //       // ...
-  //     });
-  // };
-  // toggleSignIn = () => {
-  //   if (firebase.auth().currentUser) {
-  //     // [START signout]
-  //     firebase.auth().signOut();
-  //     // [END signout]
-  //   } else {
-  //     const username = document.querySelector("#login-username").value;
-  //     const psd = document.querySelector("#login-password").value;
-  //     firebase
-  //       .auth()
-  //       .signInWithEmailAndPassword(username, psd)
-  //       .catch(function(error) {
-  //         // Handle Errors here.
-  //         var errorCode = error.code;
-  //         var errorMessage = error.message;
-  //         // [START_EXCLUDE]
-  //         if (errorCode === "auth/wrong-password") {
-  //           alert("Wrong password.");
-  //         } else {
-  //           alert(errorMessage);
-  //         }
-  //       });
-  //   }
-  // };
   deleteImage = async imageId => {
     const id = this.state.currentImg.Id;
     if (!firebase.auth().currentUser) {
@@ -319,7 +285,7 @@ class App extends Component {
   };
 
   render() {
-    const { firstPage, labels, userInfo, category } = this.state;
+    const { firstPage, labels, category } = this.state;
 
     return (
       <Container>
@@ -344,7 +310,7 @@ class App extends Component {
             <ImagePreview
               imagePreview={this.state.currentImg}
               open={this.state.modal}
-              modelClose={this.toggleModal}
+              modelClose={() => this.setState({ modal: false })}
               deleteImage={this.deleteImage}
             />
           </div>
@@ -360,4 +326,7 @@ class App extends Component {
 
 const mapStateToProps = state => state;
 
-export default connect(mapStateToProps)(App);
+export default connect(
+  mapStateToProps,
+  { loginSync }
+)(App);

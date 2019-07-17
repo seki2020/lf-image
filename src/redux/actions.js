@@ -1,12 +1,9 @@
 import firebase from "../Config/config";
-
-// export const loginSync = (username, password) => ({
-//     type: "USER_LOGIN",
-//     payload: {
-//         username,
-//         password
-//     }
-// });
+import ACTION from "./action-const";
+export const loginSync = userInfo => ({
+  type: ACTION["USER_LOGIN"],
+  payload: { userInfo }
+});
 
 export const logout = () => {
   return dispatch => {
@@ -19,7 +16,7 @@ export const logout = () => {
   };
 };
 const logoutCallSuccess = () => ({
-  type: "USER_LOGOUT",
+  type: ACTION["USER_LOGOUT"],
   payload: {}
 });
 
@@ -38,13 +35,13 @@ export const login = (username, password) => {
   };
 };
 const loginCallSuccess = userObj => ({
-  type: "CALL_LOGIN_SUCCESS",
+  type: ACTION["CALL_LOGIN_SUCCESS"],
   payload: {
     userObj
   }
 });
 const loginCallFail = userObj => ({
-  type: "CALL_LOGIN_ERROR",
+  type: ACTION["CALL_LOGIN_ERROR"],
   payload: {
     userObj
   }
@@ -65,13 +62,13 @@ export const signup = (username, password) => {
   };
 };
 const signupCallSuccess = userObj => ({
-  type: "CALL_SIGNUP_SUCCESS",
+  type: ACTION["CALL_SIGNUP_SUCCESS"],
   payload: {
     userObj
   }
 });
 const signupCallFail = userObj => ({
-  type: "CALL_SIGNUP_ERROR",
+  type: ACTION["CALL_SIGNUP_ERROR"],
   payload: {
     userObj
   }
