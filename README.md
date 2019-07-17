@@ -41,14 +41,14 @@ https://logical-fabric.firebaseapp.com/
 - `git clone https://github.com/seki2020/lf-image.git`
 - `cd lf-image`
 - `npm install`
-- get firebase credentials
-- get Google Cloud credentials file
-- create .env file in local
-- change functions/index.js to load local credential file downloaded
+-  get firebase credentials
+-  get Google Cloud credentials file
+-  create .env file in local
+-  change functions/index.js to load local credential file downloaded
 - `firebase init`
 - `firebase serve --only functions`
 - `npm start`
-- visit http://localhost:3000
+-  visit http://localhost:3000
 
 Get an overview of Firebase, how to create a project, what kind of features Firebase offers, and how to navigate through the Firebase project dashboard in this [visual tutorial for Firebase](https://www.robinwieruch.de/firebase-tutorial/).
 
