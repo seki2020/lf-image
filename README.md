@@ -6,7 +6,7 @@ https://logical-fabric.firebaseapp.com/
 
 ## Features
 
-- uses:
+- Uses:
 
   - ES2017
   - React (create-react-app)
@@ -21,7 +21,7 @@ https://logical-fabric.firebaseapp.com/
   - Jest
   - Lodash
 
-- features:
+- Features:
   - Sign In
   - Sign Up
   - Sign Out
